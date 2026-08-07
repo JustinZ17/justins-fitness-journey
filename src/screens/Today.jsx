@@ -7,7 +7,7 @@ import { ProteinSection } from '../components/ProteinSection.jsx'
 import { BodyWeightRow } from '../components/BodyWeightRow.jsx'
 import { DayWorkoutPicker } from '../components/DayWorkoutPicker.jsx'
 import { AddExerciseSheet } from '../components/AddExerciseSheet.jsx'
-import { ChevronIcon, GearIcon, PlusIcon } from '../components/Icons.jsx'
+import { CatIcon, ChevronIcon, GearIcon, PlusIcon } from '../components/Icons.jsx'
 
 const KIND_ORDER = ['primer', 'main', 'accessory']
 
@@ -129,6 +129,7 @@ export function Today({ onOpenSettings }) {
           /* A coach-led day: nothing is planned, so the primary action is to
              record what you're actually doing rather than pick a template. */
           <div className="empty">
+            <CatIcon className="empty-cat" />
             <p>
               Nothing planned — log exercises as you go.
             </p>
@@ -138,6 +139,7 @@ export function Today({ onOpenSettings }) {
           </div>
         ) : (
           <div className="empty">
+            <CatIcon className="empty-cat" />
             <p>Nothing scheduled today.</p>
             <button type="button" className="btn" onClick={() => setPickerOpen(true)}>
               Pick a workout

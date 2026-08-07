@@ -6,10 +6,11 @@ import { Routines } from './screens/Routines.jsx'
 import { SettingsSheet } from './components/SettingsSheet.jsx'
 import { ErrorBoundary } from './components/ErrorBoundary.jsx'
 import { RestTimerProvider, RestTimerBar } from './components/RestTimer.jsx'
-import { ChartIcon, DumbbellIcon, ListIcon } from './components/Icons.jsx'
+import { ChartIcon, DumbbellIcon, ListIcon, PawIcon } from './components/Icons.jsx'
 
 const TABS = [
-  { id: 'today', label: 'Today', Icon: DumbbellIcon },
+  // Today gets a paw alternate; CSS picks one on the golden theme.
+  { id: 'today', label: 'Today', Icon: DumbbellIcon, Alt: PawIcon },
   { id: 'routines', label: 'Routines', Icon: ListIcon },
   { id: 'history', label: 'History', Icon: ChartIcon },
 ]
@@ -46,7 +47,7 @@ function Shell() {
 
       <nav className="tabbar">
         <div className="tabbar-inner" role="tablist">
-          {TABS.map(({ id, label, Icon }) => (
+          {TABS.map(({ id, label, Icon, Alt }) => (
             <button
               key={id}
               type="button"
@@ -55,7 +56,8 @@ function Shell() {
               aria-selected={tab === id}
               onClick={() => setTab(id)}
             >
-              <Icon />
+              <Icon className={Alt ? 'mark-tick' : undefined} />
+              {Alt && <Alt className="mark-paw" />}
               {label}
             </button>
           ))}

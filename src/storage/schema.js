@@ -49,6 +49,7 @@ export const THEMES = [
   { id: 'daylight', name: 'Daylight', blurb: 'Off-white, calm and minimal' },
   { id: 'aurora', name: 'Aurora', blurb: 'Gradient with glass cards' },
   { id: 'terra', name: 'Terra', blurb: 'Sage, terracotta, cream' },
+  { id: 'golden', name: 'Golden', blurb: 'Golden shorthair, green eyes' },
 ]
 
 export const DEFAULT_SETTINGS = {

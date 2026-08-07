@@ -9,6 +9,7 @@ const PREVIEW = {
   daylight: { bg: '#faf9f7', card: '#eae8e4', accent: '#4a6fa5', ink: '#1b1b19' },
   aurora: { bg: 'linear-gradient(150deg,#6d28d9,#db2777)', card: 'rgba(255,255,255,0.3)', accent: '#fde047', ink: '#ffffff' },
   terra: { bg: '#f6f1e8', card: '#e5dbc9', accent: '#b5654a', ink: '#2e2a24' },
+  golden: { bg: 'linear-gradient(150deg,#f7eedc,#e7d6b3)', card: '#d6a24a', accent: '#4f7c3e', ink: '#34291d' },
 }
 
 export function ThemePicker({ value, onChange }) {

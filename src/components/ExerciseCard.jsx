@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Stepper } from './Stepper.jsx'
-import { CheckIcon, ChevronIcon, TrashIcon } from './Icons.jsx'
+import { CheckIcon, ChevronIcon, PawIcon, TrashIcon } from './Icons.jsx'
 import { formatSets, isPR, lastPerformance, suggestNext } from '../lib/progression.js'
 import { relativeDay } from '../lib/date.js'
 import { parseTempo } from '../storage/schema.js'
@@ -66,7 +66,8 @@ export function ExerciseCard({ exercise, entry, session }) {
           aria-pressed={entry.done}
         >
           <span className="checkbox">
-            <CheckIcon />
+            <CheckIcon className="mark-tick" />
+            <PawIcon className="mark-paw" />
           </span>
 
           <span className="ex-body">
@@ -183,7 +184,8 @@ export function ExerciseCard({ exercise, entry, session }) {
                 aria-label={`Mark set ${i + 1} done`}
                 onClick={() => handleSetToggle(i)}
               >
-                <CheckIcon />
+                <CheckIcon className="mark-tick" />
+                <PawIcon className="mark-paw" />
               </button>
             </div>
           ))}

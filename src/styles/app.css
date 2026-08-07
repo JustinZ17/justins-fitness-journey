@@ -1362,6 +1362,46 @@ button.bw-row:active {
   line-height: 1.35;
 }
 
+/* ------------------------------------------------- golden theme ornaments --- */
+/* Components render both marks and this decides which is visible, so nothing in
+   JSX branches on the theme. Purely decorative — never affects layout or hit
+   areas, so the app reads identically whichever theme is on. */
+
+.mark-paw,
+.empty-cat {
+  display: none;
+}
+
+[data-theme='golden'] .mark-tick {
+  display: none;
+}
+
+[data-theme='golden'] .mark-paw {
+  display: block;
+}
+
+/* Paw art is solid, so it needs to sit a touch smaller than the tick it replaces. */
+[data-theme='golden'] .checkbox .mark-paw {
+  width: 17px;
+  height: 17px;
+}
+
+[data-theme='golden'] .set-check .mark-paw {
+  width: 18px;
+  height: 18px;
+}
+
+[data-theme='golden'] .tab .mark-paw {
+  width: 21px;
+  height: 21px;
+}
+
+[data-theme='golden'] .empty-cat {
+  display: block;
+  margin: 0 auto var(--sp-3);
+  color: var(--line-strong);
+}
+
 /* ----------------------------------------------------------- rest timer --- */
 
 .rest-bar {

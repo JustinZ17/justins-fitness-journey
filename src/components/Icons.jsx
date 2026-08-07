@@ -49,3 +49,31 @@ export const PlusIcon = (p) => (
     <path d="M12 5v14M5 12h14" />
   </svg>
 )
+
+/* --- Golden theme ornaments -------------------------------------------------
+   Rendered alongside their plain counterparts and swapped by CSS on
+   [data-theme='golden'], so no component has to know which theme is active. */
+
+export const PawIcon = (p) => (
+  <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" {...p}>
+    <ellipse cx="12" cy="16.2" rx="5.1" ry="4.1" />
+    <ellipse cx="5.6" cy="10.6" rx="2.15" ry="2.7" />
+    <ellipse cx="10.1" cy="7.4" rx="2.2" ry="2.9" />
+    <ellipse cx="14.6" cy="7.4" rx="2.2" ry="2.9" />
+    <ellipse cx="18.9" cy="10.6" rx="2.15" ry="2.7" />
+  </svg>
+)
+
+/** A round-faced shorthair, for empty states. */
+export const CatIcon = (p) => (
+  <svg viewBox="0 0 64 64" width="56" height="56" {...base} strokeWidth="2.4" {...p}>
+    <path d="M17 20.5 14.5 8.5 26 14" />
+    <path d="M47 20.5 49.5 8.5 38 14" />
+    <circle cx="32" cy="35" r="19" />
+    <path d="M31 41.5 32.8 43.2 34.6 41.5" />
+    <path d="M32.8 43.2v2.4" />
+    <path d="M9 32.5h9M9 38.5h9M55 32.5h-9M55 38.5h-9" />
+    <circle cx="24.5" cy="32" r="2.1" fill="currentColor" stroke="none" />
+    <circle cx="40" cy="32" r="2.1" fill="currentColor" stroke="none" />
+  </svg>
+)
