@@ -1,8 +1,12 @@
 import { useEffect, useState } from 'react'
 import { StoreProvider, useStore } from './storage/StoreProvider.jsx'
 import { Today } from './screens/Today.jsx'
+import { History } from './screens/History.jsx'
+import { Routines } from './screens/Routines.jsx'
 import { SettingsSheet } from './components/SettingsSheet.jsx'
-import { ChartIcon, DumbbellIcon, GearIcon, ListIcon } from './components/Icons.jsx'
+import { ErrorBoundary } from './components/ErrorBoundary.jsx'
+import { RestTimerProvider, RestTimerBar } from './components/RestTimer.jsx'
+import { ChartIcon, DumbbellIcon, ListIcon } from './components/Icons.jsx'
 
 const TABS = [
   { id: 'today', label: 'Today', Icon: DumbbellIcon },
@@ -35,12 +39,10 @@ function Shell() {
   return (
     <div className="app">
       {tab === 'today' && <Today onOpenSettings={() => setSettingsOpen(true)} />}
-      {tab === 'routines' && (
-        <Placeholder title="Routines" onOpenSettings={() => setSettingsOpen(true)} />
-      )}
-      {tab === 'history' && (
-        <Placeholder title="History" onOpenSettings={() => setSettingsOpen(true)} />
-      )}
+      {tab === 'routines' && <Routines onOpenSettings={() => setSettingsOpen(true)} />}
+      {tab === 'history' && <History onOpenSettings={() => setSettingsOpen(true)} />}
+
+      <RestTimerBar />
 
       <nav className="tabbar">
         <div className="tabbar-inner" role="tablist">
@@ -65,33 +67,14 @@ function Shell() {
   )
 }
 
-function Placeholder({ title, onOpenSettings }) {
-  return (
-    <div className="screen">
-      <div className="container">
-        <header className="page-head">
-          <div>
-            <p className="eyebrow">Coming next</p>
-            <div className="title-btn" style={{ pointerEvents: 'none' }}>
-              <h1>{title}</h1>
-            </div>
-          </div>
-          <button type="button" className="icon-btn" aria-label="Settings" onClick={onOpenSettings}>
-            <GearIcon />
-          </button>
-        </header>
-        <div className="empty">
-          <p>Not built yet — Today first.</p>
-        </div>
-      </div>
-    </div>
-  )
-}
-
 export default function App() {
   return (
-    <StoreProvider>
-      <Shell />
-    </StoreProvider>
+    <ErrorBoundary>
+      <StoreProvider>
+        <RestTimerProvider>
+          <Shell />
+        </RestTimerProvider>
+      </StoreProvider>
+    </ErrorBoundary>
   )
 }

@@ -16,6 +16,16 @@
 const CACHE_VERSION = 'v1'
 const CACHE_NAME = `fitness-shell-${CACHE_VERSION}`
 
+/**
+ * How long a navigation waits for the network before falling back to cache.
+ *
+ * Clean offline fails instantly, so it was never the problem. One bar of
+ * signal is: the request hangs rather than erroring, and the app appears to
+ * freeze on launch — in exactly the basement this thing was built for. Losing
+ * a deploy's freshness for one launch beats a five-second white screen.
+ */
+const NAV_TIMEOUT_MS = 3000
+
 // Resolved against the SW's own location, so this works under the GitHub Pages
 // base path without hardcoding it.
 const SHELL = [
@@ -111,8 +121,14 @@ self.addEventListener('fetch', (event) => {
   if (url.origin !== self.location.origin) return
 
   if (request.mode === 'navigate') {
+    // Reject rather than resolve, so a slow network falls into the same .catch
+    // as a dead one and serves the cached shell.
+    const timeout = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('network too slow')), NAV_TIMEOUT_MS)
+    )
+
     event.respondWith(
-      fetch(request)
+      Promise.race([fetch(request), timeout])
         .then((response) => {
           const forCache = response.clone()
           const forScan = response.clone()

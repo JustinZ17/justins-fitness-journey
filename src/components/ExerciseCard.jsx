@@ -5,6 +5,7 @@ import { formatSets, isPR, lastPerformance, suggestNext } from '../lib/progressi
 import { relativeDay } from '../lib/date.js'
 import { parseTempo } from '../storage/schema.js'
 import { useStore } from '../storage/StoreProvider.jsx'
+import { useRestTimer } from './RestTimer.jsx'
 
 /**
  * One exercise in today's checklist.
@@ -26,6 +27,18 @@ export function ExerciseCard({ exercise, entry, session }) {
     applyWeightToPending,
     removeExerciseFromSession,
   } = useStore()
+  const rest = useRestTimer()
+
+  /**
+   * Checking a set off starts the rest clock; un-checking a mistake shouldn't.
+   * Only the per-set control does this — the whole-card tap usually means
+   * "I did this earlier", where a countdown would just be noise.
+   */
+  const handleSetToggle = (index) => {
+    const wasDone = entry.sets[index]?.done
+    toggleSetDone(session.id, exercise.id, index)
+    if (!wasDone) rest?.start(exercise.restSeconds, exercise.name)
+  }
 
   const unit = settings.unit
   const last = lastPerformance(sessions, exercise.id, { excludeSessionId: session.id })
@@ -168,7 +181,7 @@ export function ExerciseCard({ exercise, entry, session }) {
                 className="set-check"
                 aria-pressed={set.done}
                 aria-label={`Mark set ${i + 1} done`}
-                onClick={() => toggleSetDone(session.id, exercise.id, i)}
+                onClick={() => handleSetToggle(i)}
               >
                 <CheckIcon />
               </button>
