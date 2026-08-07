@@ -24,6 +24,7 @@ export function ExerciseCard({ exercise, entry, session }) {
     addSet,
     removeSet,
     applyWeightToPending,
+    removeExerciseFromSession,
   } = useStore()
 
   const unit = settings.unit
@@ -57,7 +58,9 @@ export function ExerciseCard({ exercise, entry, session }) {
 
           <span className="ex-body">
             <span className="ex-title">
-              {exercise.slot && <span className="slot">{exercise.slot}</span>}
+              {/* The slot letter is a position in a written program. On an
+                  ad-hoc day there is no program, so it would be noise. */}
+              {exercise.slot && !entry.adhoc && <span className="slot">{exercise.slot}</span>}
               <span className="ex-name">{exercise.name}</span>
               {anyPR && <span className="pr-badge">PR</span>}
             </span>
@@ -72,17 +75,17 @@ export function ExerciseCard({ exercise, entry, session }) {
           )}
         </button>
 
-        {!isPrimer && (
-          <button
-            type="button"
-            className="ex-expand"
-            aria-expanded={open}
-            aria-label={open ? `Hide sets for ${exercise.name}` : `Show sets for ${exercise.name}`}
-            onClick={() => setOpen((v) => !v)}
-          >
-            <ChevronIcon />
-          </button>
-        )}
+        {/* Primers have no sets, but still need somewhere to hold notes and the
+            remove action, so they keep the disclosure too. */}
+        <button
+          type="button"
+          className="ex-expand"
+          aria-expanded={open}
+          aria-label={open ? `Hide details for ${exercise.name}` : `Show details for ${exercise.name}`}
+          onClick={() => setOpen((v) => !v)}
+        >
+          <ChevronIcon />
+        </button>
       </div>
 
       {open && !isPrimer && (
@@ -199,6 +202,29 @@ export function ExerciseCard({ exercise, entry, session }) {
               )}
             </p>
           )}
+
+          {/* Today only — the workout template and the exercise library are
+              both left alone, so this is safe to tap on a skipped lift. */}
+          <button
+            type="button"
+            className="link-btn remove-today"
+            onClick={() => removeExerciseFromSession(session.id, exercise.id)}
+          >
+            Remove from today
+          </button>
+        </div>
+      )}
+
+      {open && isPrimer && (
+        <div className="ex-detail">
+          {exercise.notes && <p className="notes" style={{ marginTop: 0, paddingTop: 0, borderTop: 'none' }}>{exercise.notes}</p>}
+          <button
+            type="button"
+            className="link-btn remove-today"
+            onClick={() => removeExerciseFromSession(session.id, exercise.id)}
+          >
+            Remove from today
+          </button>
         </div>
       )}
     </article>

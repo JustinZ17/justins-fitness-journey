@@ -6,7 +6,8 @@ import { ExerciseCard } from '../components/ExerciseCard.jsx'
 import { ProteinSection } from '../components/ProteinSection.jsx'
 import { BodyWeightRow } from '../components/BodyWeightRow.jsx'
 import { DayWorkoutPicker } from '../components/DayWorkoutPicker.jsx'
-import { ChevronIcon, GearIcon } from '../components/Icons.jsx'
+import { AddExerciseSheet } from '../components/AddExerciseSheet.jsx'
+import { ChevronIcon, GearIcon, PlusIcon } from '../components/Icons.jsx'
 
 const KIND_ORDER = ['primer', 'main', 'accessory']
 
@@ -33,6 +34,7 @@ function buildGroups(entries, exercisesById) {
 export function Today({ onOpenSettings }) {
   const date = todayISO()
   const [pickerOpen, setPickerOpen] = useState(false)
+  const [addOpen, setAddOpen] = useState(false)
   const { exercises, sessions, workoutForDate, ensureSession } = useStore()
 
   const workout = workoutForDate(date)
@@ -118,14 +120,20 @@ export function Today({ onOpenSettings }) {
                 </div>
               )
             })}
+
+            <button type="button" className="btn full add-exercise" onClick={() => setAddOpen(true)}>
+              <PlusIcon /> Add exercise
+            </button>
           </section>
-        ) : workout ? (
+        ) : workout && session ? (
+          /* A coach-led day: nothing is planned, so the primary action is to
+             record what you're actually doing rather than pick a template. */
           <div className="empty">
             <p>
-              <strong>{workout.name}</strong> has no exercises yet.
+              Nothing planned — log exercises as you go.
             </p>
-            <button type="button" className="btn" onClick={() => setPickerOpen(true)}>
-              Pick another workout
+            <button type="button" className="btn primary" onClick={() => setAddOpen(true)}>
+              <PlusIcon /> Add exercise
             </button>
           </div>
         ) : (
@@ -146,6 +154,9 @@ export function Today({ onOpenSettings }) {
         </section>
 
         {pickerOpen && <DayWorkoutPicker date={date} onClose={() => setPickerOpen(false)} />}
+        {addOpen && session && (
+          <AddExerciseSheet session={session} onClose={() => setAddOpen(false)} />
+        )}
       </div>
     </div>
   )

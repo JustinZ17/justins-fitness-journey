@@ -180,6 +180,54 @@ export function StoreProvider({ children }) {
     [mutate]
   )
 
+  /**
+   * Add an exercise to TODAY'S SESSION ONLY, leaving the workout template alone.
+   *
+   * This is what makes coach-led days work: on Tuesday you don't know what's
+   * coming, so there's nothing to pre-plan — you record what happened. The
+   * exercise still persists in the library, so the second time it's one tap.
+   */
+  const addExerciseToSession = useCallback(
+    (sessionId, exerciseId) => {
+      const { exercises, sessions } = ref.current
+      const exercise = exercises.find((e) => e.id === exerciseId)
+      const session = sessions.find((s) => s.id === sessionId)
+      if (!exercise || !session) return
+      if (session.completed.some((c) => c.exerciseId === exerciseId)) return
+
+      const suggestion = suggestNext(exercise, lastPerformance(sessions, exerciseId))
+      const setCount = exercise.targetSets > 0 ? exercise.targetSets : 3
+      const entry = {
+        exerciseId,
+        adhoc: true,
+        done: false,
+        sets: Array.from({ length: setCount }, () => ({
+          weight: suggestion.weight,
+          reps: suggestion.reps,
+          done: false,
+        })),
+      }
+
+      mutate('sessions', (list) =>
+        list.map((s) => (s.id === sessionId ? { ...s, completed: [...s.completed, entry] } : s))
+      )
+    },
+    [mutate]
+  )
+
+  /** Drop an exercise from today only — the workout template is untouched. */
+  const removeExerciseFromSession = useCallback(
+    (sessionId, exerciseId) =>
+      mutate('sessions', (list) =>
+        list.map((s) =>
+          s.id === sessionId
+            ? { ...s, completed: s.completed.filter((c) => c.exerciseId !== exerciseId) }
+            : s
+        )
+      ),
+    [mutate]
+  )
+
   const updateEntry = useCallback(
     (sessionId, exerciseId, updater) =>
       mutate('sessions', (list) =>
@@ -404,6 +452,8 @@ export function StoreProvider({ children }) {
       updateSettings,
       setScheduleDay,
       ensureSession,
+      addExerciseToSession,
+      removeExerciseFromSession,
       toggleExerciseDone,
       toggleSetDone,
       patchSet,
@@ -425,7 +475,8 @@ export function StoreProvider({ children }) {
       workoutForDate,
     }),
     [
-      ready, state, updateSettings, setScheduleDay, ensureSession, toggleExerciseDone, toggleSetDone,
+      ready, state, updateSettings, setScheduleDay, ensureSession, addExerciseToSession,
+      removeExerciseFromSession, toggleExerciseDone, toggleSetDone,
       patchSet, addSet, removeSet, applyWeightToPending, addFoodEntry, addProteinDirect,
       removeFoodEntry, saveFood, removeFood, setBodyWeight, saveExercise, removeExercise,
       saveWorkout, removeWorkout, exportAll, importAll, workoutForDate,
