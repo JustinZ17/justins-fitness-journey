@@ -22,6 +22,12 @@ export function Diagnostics() {
 
       setInfo({
         build: typeof __BUILD_TIME__ === 'string' ? __BUILD_TIME__ : 'dev',
+        theme: document.documentElement.dataset.theme || '(unset)',
+        // What iOS tints the status bar from, vs what's actually behind the
+        // app. If these differ, the band across the top won't match.
+        themeColor:
+          document.querySelector('meta[name="theme-color"]')?.getAttribute('content') ?? '(none)',
+        bodyBg: getComputedStyle(document.body).backgroundColor,
         standalone:
           window.matchMedia('(display-mode: standalone)').matches ||
           window.navigator.standalone === true,
