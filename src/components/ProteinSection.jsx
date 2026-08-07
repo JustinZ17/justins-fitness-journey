@@ -2,14 +2,14 @@ import { useMemo, useState } from 'react'
 import { useStore } from '../storage/StoreProvider.jsx'
 import { DIRECT_PROTEIN_ID } from '../storage/schema.js'
 import { TrashIcon } from './Icons.jsx'
-import { Sheet } from './Sheet.jsx'
 import { FoodManager } from './FoodManager.jsx'
+import { AddFoodSheet } from './AddFoodSheet.jsx'
 
 const proteinOf = (food, grams) => ((food?.proteinPer100g ?? 0) * grams) / 100
 const round = (n) => Math.round(n * 10) / 10
 
 export function ProteinSection({ date }) {
-  const { foods, foodEntries, settings, addFoodEntry, addProteinDirect, removeFoodEntry } = useStore()
+  const { foods, foodEntries, settings, addFoodEntry, removeFoodEntry } = useStore()
   const [manualOpen, setManualOpen] = useState(false)
   const [foodsOpen, setFoodsOpen] = useState(false)
 
@@ -20,29 +20,33 @@ export function ProteinSection({ date }) {
   const target = settings.proteinTarget || 120
   const pct = Math.min(100, (total / target) * 100)
 
-  // Pinned first, then whatever you actually eat most, so the row is partly
-  // chosen and partly earned. Archived foods never appear.
-  const quick = useMemo(
-    () =>
-      foods
-        .filter((f) => f.id !== DIRECT_PROTEIN_ID && !f.archived)
-        .slice()
-        .sort(
-          (a, b) =>
-            (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0) ||
-            (b.useCount || 0) - (a.useCount || 0) ||
-            a.name.localeCompare(b.name)
-        )
-        .slice(0, 6),
-    [foods]
-  )
+  /**
+   * Pinned foods first and never truncated — pinning is an explicit "keep this
+   * one tap away", so a cap would quietly ignore it. The rest fill up to six by
+   * how often they're used. A tile at the end always opens the full list, so
+   * the row never reads as the only things you're allowed to log.
+   */
+  const { quick, moreCount } = useMemo(() => {
+    const usable = foods
+      .filter((f) => f.id !== DIRECT_PROTEIN_ID && !f.archived)
+      .slice()
+      .sort(
+        (a, b) =>
+          (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0) ||
+          (b.useCount || 0) - (a.useCount || 0) ||
+          a.name.localeCompare(b.name)
+      )
+    const pinnedCount = usable.filter((f) => f.pinned).length
+    const shown = usable.slice(0, Math.max(6, pinnedCount))
+    return { quick: shown, moreCount: usable.length - shown.length }
+  }, [foods])
 
   return (
     <section className="section">
       <div className="section-head">
         <h2>Protein</h2>
-        <button type="button" className="link-btn" onClick={() => setManualOpen(true)}>
-          Add manually
+        <button type="button" className="link-btn" onClick={() => setFoodsOpen(true)}>
+          Edit foods
         </button>
       </div>
 
@@ -74,11 +78,16 @@ export function ProteinSection({ date }) {
               </span>
             </button>
           ))}
-        </div>
 
-        <button type="button" className="link-btn edit-foods" onClick={() => setFoodsOpen(true)}>
-          Edit foods
-        </button>
+          {/* Always present, so the row is obviously a shortcut and not the
+              complete list of what can be logged. */}
+          <button type="button" className="qa-more" onClick={() => setManualOpen(true)}>
+            <span className="qa-name">Something else</span>
+            <span className="qa-sub">
+              {moreCount > 0 ? `${moreCount} more foods` : 'any amount'}
+            </span>
+          </button>
+        </div>
 
         {today.length > 0 && (
           <div className="entry-list">
@@ -109,97 +118,15 @@ export function ProteinSection({ date }) {
       {foodsOpen && <FoodManager onClose={() => setFoodsOpen(false)} />}
 
       {manualOpen && (
-        <ManualEntrySheet
-          foods={foods}
+        <AddFoodSheet
+          date={date}
           onClose={() => setManualOpen(false)}
-          onAddFood={(foodId, grams) => {
-            addFoodEntry(foodId, grams, date)
+          onManageFoods={() => {
             setManualOpen(false)
-          }}
-          onAddDirect={(grams) => {
-            addProteinDirect(grams, date)
-            setManualOpen(false)
+            setFoodsOpen(true)
           }}
         />
       )}
     </section>
-  )
-}
-
-function ManualEntrySheet({ foods, onClose, onAddFood, onAddDirect }) {
-  const selectable = foods.filter((f) => f.id !== DIRECT_PROTEIN_ID && !f.archived)
-  const [foodId, setFoodId] = useState(selectable[0]?.id ?? '')
-  const [grams, setGrams] = useState(String(selectable[0]?.defaultServingGrams ?? 100))
-  const [direct, setDirect] = useState('')
-
-  const food = foods.find((f) => f.id === foodId)
-  const computed = round(proteinOf(food, Number(grams) || 0))
-
-  return (
-    <Sheet title="Add protein" onClose={onClose}>
-      <label className="field">
-        <span>Straight from the label</span>
-        <div className="sheet-row">
-          <input
-            className="input"
-            inputMode="decimal"
-            placeholder="grams of protein"
-            value={direct}
-            onChange={(e) => setDirect(e.target.value)}
-          />
-          <button
-            type="button"
-            className="btn primary"
-            style={{ flex: '0 0 auto' }}
-            disabled={!(Number(direct) > 0)}
-            onClick={() => onAddDirect(Number(direct))}
-          >
-            Add
-          </button>
-        </div>
-      </label>
-
-      <div className="divider">or weigh a food</div>
-
-      <label className="field">
-        <span>Food</span>
-        <select
-          className="input"
-          value={foodId}
-          onChange={(e) => {
-            setFoodId(e.target.value)
-            const next = foods.find((f) => f.id === e.target.value)
-            if (next) setGrams(String(next.defaultServingGrams))
-          }}
-        >
-          {selectable.map((f) => (
-            <option key={f.id} value={f.id}>
-              {f.name} — {f.proteinPer100g} g/100 g
-            </option>
-          ))}
-        </select>
-      </label>
-
-      <label className="field">
-        <span>Grams</span>
-        <input
-          className="input"
-          inputMode="decimal"
-          value={grams}
-          onChange={(e) => setGrams(e.target.value)}
-        />
-      </label>
-
-      <p className="hint">That's {computed} g of protein.</p>
-
-      <button
-        type="button"
-        className="btn primary full"
-        disabled={!foodId || !(Number(grams) > 0)}
-        onClick={() => onAddFood(foodId, Number(grams))}
-      >
-        Add {computed} g
-      </button>
-    </Sheet>
   )
 }

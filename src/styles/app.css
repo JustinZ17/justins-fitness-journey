@@ -1966,9 +1966,104 @@ button.bw-row:active {
 
 /* --------------------------------------------------------------- foods --- */
 
-.edit-foods {
+/* Dashed so it reads as "and more" rather than as another food. */
+.qa-more {
+  min-height: 62px;
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--r-md);
+  background: transparent;
+  border: 1px dashed var(--line-strong);
+  text-align: left;
+  line-height: 1.25;
+  color: var(--ink-muted);
+  transition: transform 0.12s ease, background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.qa-more:active {
+  transform: scale(0.95);
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+.food-row {
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  overflow: hidden;
+  transition: border-color 0.15s ease;
+}
+
+.food-row.open {
+  border-color: var(--accent);
+}
+
+.food-row-main {
+  display: flex;
+  align-items: stretch;
+}
+
+.food-pick {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  flex: 1;
+  min-width: 0;
+  min-height: 60px;
+  padding: var(--sp-3) var(--sp-4);
+  text-align: left;
+  transition: background-color 0.15s ease;
+}
+
+.food-pick:active {
+  background: var(--accent-soft);
+}
+
+.food-pick strong {
   display: block;
-  margin: var(--sp-3) auto 0;
+  font-size: var(--step-0);
+  font-weight: 700;
+}
+
+.food-pick small {
+  font-size: var(--step--1);
+  color: var(--ink-muted);
+}
+
+.food-pick svg {
+  flex-shrink: 0;
+  color: var(--accent);
+}
+
+/* Separate target so changing the amount can't be mistaken for logging it. */
+.food-amount {
+  width: 46px;
+  flex-shrink: 0;
+  border-left: 1px solid var(--line);
+  color: var(--ink-faint);
+  font-size: var(--step--1);
+  font-weight: 700;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.food-amount:active {
+  background: var(--surface-3);
+  color: var(--ink);
+}
+
+.food-row-edit {
+  display: flex;
+  gap: var(--sp-2);
+  padding: 0 var(--sp-3) var(--sp-3);
+}
+
+.food-row-edit .input {
+  flex: 1;
+  min-width: 0;
+}
+
+.food-row-edit .btn {
+  flex-shrink: 0;
 }
 
 .pin-dot {
