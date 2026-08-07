@@ -1187,9 +1187,12 @@ button.bw-row:active {
 
 /* -------------------------------------------------------------- sheets ---- */
 
+/* Portalled to <body>, so this sits above .app (z-index 1) and its tab bar
+   rather than being trapped inside the scrolling area. */
 .sheet-backdrop {
   position: fixed;
   inset: 0;
+  overscroll-behavior: contain;
   background: rgba(0, 0, 0, 0.55);
   backdrop-filter: blur(3px);
   -webkit-backdrop-filter: blur(3px);
@@ -1209,8 +1212,12 @@ button.bw-row:active {
 .sheet {
   width: 100%;
   max-width: 560px;
-  max-height: 88vh;
+  max-height: 88dvh;
   overflow-y: auto;
+  /* Stop a scroll that reaches the end of the sheet from continuing into the
+     page behind it. */
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
   background: var(--surface);
   backdrop-filter: var(--blur);
   -webkit-backdrop-filter: var(--blur);
