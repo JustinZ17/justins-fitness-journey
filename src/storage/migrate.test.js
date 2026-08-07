@@ -40,8 +40,11 @@ describe('nothing logged yet', () => {
     assert.ok(result.exercises.some((e) => e.name === 'ATW'))
   })
 
-  test('drops the stale routines rather than leaving them cluttering the list', () => {
-    assert.ok(!result.workouts.some((w) => w.id === 'w-push'))
+  test('ends up with exactly the current default routines', () => {
+    assert.deepEqual(
+      result.workouts.map((w) => w.id),
+      SEED.workouts.map((w) => w.id)
+    )
   })
 
   test('clears a schedule that pointed at workouts which no longer exist', () => {

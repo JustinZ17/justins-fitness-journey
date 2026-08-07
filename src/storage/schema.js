@@ -14,13 +14,14 @@
  *
  * All dates are 'YYYY-MM-DD' in local time — see lib/date.js.
  *
- * The seed below is Justin's own training day, so a fresh install or a cleared
- * storage comes back as his real program rather than a stock split.
+ * The seed carries Justin's own training day, so a fresh install or a cleared
+ * storage comes back as his real program — plus a dumbbell push/pull/legs
+ * split he isn't using now but wants on hand.
  *
- * It carries the prescription only — movements, sets, reps, tempo, rest, and the
- * D-group tri-set. Deliberately NO working weights and NO weekly schedule: this
- * file is committed to a public repo and git history is permanent, so how much
- * he lifts and which days he trains stay in his private backup instead.
+ * Prescription only — movements, sets, reps, tempo, rest, and the D-group
+ * tri-set. Deliberately NO working weights and NO weekly schedule: this file is
+ * committed to a public repo and git history is permanent, so how much he lifts
+ * and which days he trains stay in his private backup instead.
  */
 
 export const SCHEMA_VERSION = 2
@@ -33,7 +34,7 @@ export const SCHEMA_VERSION = 2
  * change to the program simply never arrived. This version lets an existing
  * install pick up a new default program without losing anything logged.
  */
-export const SEED_VERSION = 2
+export const SEED_VERSION = 3
 
 export const COLLECTIONS = {
   settings: 'settings',
@@ -105,10 +106,13 @@ export function parseTempo(tempo) {
   return digits
 }
 
-// --- seed: Justin's own training day ---------------------------------------
-// Prescription only. Working weights live in his private backup, not here.
+// --- seed --------------------------------------------------------------------
+// Justin's own training day, plus a dumbbell push/pull/legs split kept on hand
+// for later. Prescription only — working weights live in his private backup.
+//
 // Slot letters are the coach's grouping: a shared letter (D1/D2/D3) runs as a
-// superset, which Today renders as one bracketed block.
+// superset, which Today renders as one bracketed block. The PPL routines carry
+// no slots, because they aren't written that way.
 
 const ex = (id, name, targetSets, targetReps, increment = 5, notes = '', extra = {}) => ({
   id,
@@ -125,24 +129,15 @@ const ex = (id, name, targetSets, targetReps, increment = 5, notes = '', extra =
   ...extra,
 })
 
-export const SEED_EXERCISES = [
+/** The trainer's Day 3 — the program actually in use. */
+const DAY3_EXERCISES = [
   ex('e-atw', 'ATW', 0, 0, 5, 'Primer — no load tracked.', { kind: 'primer', slot: 'P1' }),
-  ex('e-leg-press', 'Leg press', 3, 12, 10, '', {
-    slot: 'A1',
-    tempo: '2100',
-    restSeconds: 90,
-  }),
-  ex('e-seated-row-high', 'Seated row (High)', 3, 12, 5, '', {
-    slot: 'B1',
-    tempo: '2002',
-    restSeconds: 90,
-  }),
-  ex('e-chest-press', 'Chest press', 3, 10, 5, '', {
-    slot: 'C1',
-    tempo: '2100',
-    restSeconds: 90,
-  }),
-  ex('e-lateral-raise', 'Lateral raise', 3, 14, 2.5, '', {
+  ex('e-leg-press', 'Leg press', 3, 12, 10, '', { slot: 'A1', tempo: '2100', restSeconds: 90 }),
+  ex('e-seated-row-high', 'Seated row (High)', 3, 12, 5, '', { slot: 'B1', tempo: '2002', restSeconds: 90 }),
+  ex('e-chest-press', 'Chest press', 3, 10, 5, '', { slot: 'C1', tempo: '2100', restSeconds: 90 }),
+  // Shared with Push Day below rather than duplicated — two exercises with the
+  // same name would be worse than one carrying a slot it only uses on Day 3.
+  ex('e-lateral-raise', 'Lateral raise', 3, 14, 2.5, 'Light. Lead with the elbows.', {
     kind: 'accessory',
     slot: 'D1',
     restSeconds: 90,
@@ -151,16 +146,54 @@ export const SEED_EXERCISES = [
   ex('e-tricep-pushdown', 'Tricep pushdown', 3, 12, 2.5, '', { kind: 'accessory', slot: 'D3' }),
 ]
 
+/** A standard dumbbell split, unused for now but here when it's wanted. */
+const DUMBBELL_EXERCISES = [
+  ex('e-db-bench', 'Dumbbell Bench Press', 3, 10, 5, 'Elbows ~45°, control the way down.'),
+  ex('e-incline-press', 'Incline Dumbbell Press', 3, 10, 5),
+  ex('e-shoulder-press', 'Dumbbell Shoulder Press', 3, 10, 5),
+  ex('e-tricep-ext', 'Overhead Tricep Extension', 3, 12, 5, '', { kind: 'accessory' }),
+  ex('e-db-row', 'One-Arm Dumbbell Row', 3, 10, 5, 'Per side. Pull to the hip, not the chest.'),
+  ex('e-db-pullover', 'Dumbbell Pullover', 3, 12, 5),
+  ex('e-rear-delt-fly', 'Rear Delt Fly', 3, 12, 5, '', { kind: 'accessory' }),
+  ex('e-db-curl', 'Dumbbell Curl', 3, 10, 5, '', { kind: 'accessory' }),
+  ex('e-hammer-curl', 'Hammer Curl', 3, 10, 5, '', { kind: 'accessory' }),
+  ex('e-goblet-squat', 'Goblet Squat', 3, 10, 10, 'One dumbbell at the chest. Sit down, not back.'),
+  ex('e-rdl', 'Dumbbell Romanian Deadlift', 3, 10, 10, 'Hinge at the hips, soft knees, flat back.'),
+  ex('e-db-lunge', 'Dumbbell Lunge', 3, 10, 5, 'Per leg.'),
+  ex('e-calf-raise', 'Dumbbell Calf Raise', 3, 15, 5, '', { kind: 'accessory' }),
+  ex('e-glute-bridge', 'Dumbbell Glute Bridge', 3, 12, 10, '', { kind: 'accessory' }),
+]
+
+export const SEED_EXERCISES = [...DAY3_EXERCISES, ...DUMBBELL_EXERCISES]
+
 export const SEED_WORKOUTS = [
   {
     id: 'w-day3',
     name: 'Day 3',
     note: 'Solo session · ~43 min · programmed by trainer',
-    exerciseIds: SEED_EXERCISES.map((e) => e.id),
+    exerciseIds: DAY3_EXERCISES.map((e) => e.id),
   },
   // Coach-led days vary week to week, so there is nothing to pre-plan — this
   // exists to name the day and hold whatever gets logged ad-hoc.
   { id: 'w-trainer', name: 'Trainer session', note: 'With coach · log as you go', exerciseIds: [] },
+  {
+    id: 'w-push',
+    name: 'Push Day',
+    note: '',
+    exerciseIds: ['e-db-bench', 'e-incline-press', 'e-shoulder-press', 'e-lateral-raise', 'e-tricep-ext'],
+  },
+  {
+    id: 'w-pull',
+    name: 'Pull Day',
+    note: '',
+    exerciseIds: ['e-db-row', 'e-db-pullover', 'e-rear-delt-fly', 'e-db-curl', 'e-hammer-curl'],
+  },
+  {
+    id: 'w-legs',
+    name: 'Leg Day',
+    note: '',
+    exerciseIds: ['e-goblet-squat', 'e-rdl', 'e-db-lunge', 'e-calf-raise', 'e-glute-bridge'],
+  },
 ]
 
 /** Special food used by the "just log grams of protein" path. */

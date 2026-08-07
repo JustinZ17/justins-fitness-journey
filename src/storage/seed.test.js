@@ -13,9 +13,11 @@ import { guideFor } from '../lib/guides.js'
  */
 
 describe('seed carries the prescription', () => {
-  test('has the movements from the plan, in order', () => {
+  test('Day 3 has the movements from the sheet, in order', () => {
+    const day3 = SEED_WORKOUTS.find((w) => w.id === 'w-day3')
+    const byId = new Map(SEED_EXERCISES.map((e) => [e.id, e]))
     assert.deepEqual(
-      SEED_EXERCISES.map((e) => e.name),
+      day3.exerciseIds.map((id) => byId.get(id).name),
       [
         'ATW',
         'Leg press',
@@ -26,6 +28,29 @@ describe('seed carries the prescription', () => {
         'Tricep pushdown',
       ]
     )
+  })
+
+  test('the dumbbell split is kept alongside it for later', () => {
+    for (const id of ['w-push', 'w-pull', 'w-legs']) {
+      const workout = SEED_WORKOUTS.find((w) => w.id === id)
+      assert.ok(workout, `${id} is missing`)
+      assert.ok(workout.exerciseIds.length > 0, `${id} has no exercises`)
+    }
+  })
+
+  test('every workout references exercises that exist', () => {
+    // A dangling id renders as a missing card and is easy to introduce by hand.
+    const ids = new Set(SEED_EXERCISES.map((e) => e.id))
+    for (const workout of SEED_WORKOUTS) {
+      for (const id of workout.exerciseIds) {
+        assert.ok(ids.has(id), `"${workout.name}" points at unknown exercise "${id}"`)
+      }
+    }
+  })
+
+  test('exercise ids are unique', () => {
+    const ids = SEED_EXERCISES.map((e) => e.id)
+    assert.equal(ids.length, new Set(ids).size, 'duplicate exercise id in the seed')
   })
 
   test('keeps the coach notation', () => {
@@ -54,9 +79,9 @@ describe('seed carries the prescription', () => {
     }
   })
 
-  test('Day 3 contains every exercise', () => {
+  test('Day 3 contains exactly the seven from the sheet', () => {
     const day3 = SEED_WORKOUTS.find((w) => w.id === 'w-day3')
-    assert.equal(day3.exerciseIds.length, SEED_EXERCISES.length)
+    assert.equal(day3.exerciseIds.length, 7)
   })
 })
 
