@@ -38,12 +38,27 @@ const SHELL_ROOT = new URL('./', self.location).href
  * visit — and "it worked at home but not in the basement" is exactly the bug
  * that would produce.
  */
-/** Asset URLs the currently deployed index.html points at. */
-async function currentAssets() {
-  const html = await (await fetch(new URL('./index.html', self.location), { cache: 'reload' })).text()
+/** Hashed asset URLs referenced by a page of HTML. */
+function assetsFromHtml(html) {
   return [...html.matchAll(/(?:src|href)="([^"]+)"/g)]
     .map((m) => new URL(m[1], self.location).href)
     .filter((url) => url.includes('/assets/'))
+}
+
+/** Asset URLs the currently deployed index.html points at. */
+async function currentAssets() {
+  const res = await fetch(new URL('./index.html', self.location), { cache: 'reload' })
+  return assetsFromHtml(await res.text())
+}
+
+/** Delete cached assets that `keep` doesn't mention. */
+async function dropAssetsExcept(keep) {
+  const cache = await caches.open(CACHE_NAME)
+  const keepSet = new Set(keep)
+  const stale = (await cache.keys()).filter(
+    (req) => req.url.includes('/assets/') && !keepSet.has(req.url)
+  )
+  await Promise.all(stale.map((req) => cache.delete(req)))
 }
 
 async function precache() {
@@ -68,14 +83,9 @@ async function precache() {
  */
 async function pruneStaleAssets() {
   try {
-    const cache = await caches.open(CACHE_NAME)
-    const keep = new Set(await currentAssets())
-    const stale = (await cache.keys()).filter(
-      (req) => req.url.includes('/assets/') && !keep.has(req.url)
-    )
-    await Promise.all(stale.map((req) => cache.delete(req)))
+    await dropAssetsExcept(await currentAssets())
   } catch (err) {
-    // Offline during activation — the next activate will catch up.
+    // Offline — the next successful navigation prunes instead.
   }
 }
 
@@ -104,8 +114,24 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
       fetch(request)
         .then((response) => {
-          const copy = response.clone()
-          caches.open(CACHE_NAME).then((cache) => cache.put(SHELL_ROOT, copy))
+          const forCache = response.clone()
+          const forScan = response.clone()
+
+          // A successful navigation is the one moment we hold proof of what the
+          // current deploy references, so it's also where the cache gets swept.
+          // Doing this only in `activate` would almost never run: sw.js is
+          // byte-identical across app-only deploys, so no new worker installs.
+          event.waitUntil(
+            (async () => {
+              const cache = await caches.open(CACHE_NAME)
+              await cache.put(SHELL_ROOT, forCache)
+              try {
+                await dropAssetsExcept(assetsFromHtml(await forScan.text()))
+              } catch (err) {
+                /* non-HTML or unreadable body — leave the cache alone */
+              }
+            })()
+          )
           return response
         })
         .catch(() => caches.match(SHELL_ROOT).then((hit) => hit || caches.match('./index.html')))
