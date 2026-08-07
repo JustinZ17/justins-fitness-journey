@@ -33,6 +33,39 @@
          tracks the active theme. -->
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Fitness" />
+
+    <!--
+      Apply the saved theme before first paint.
+
+      iOS tints the status bar from theme-color and samples it at launch, long
+      before React mounts and can update it. Left to the app, a light theme gets
+      a dark band across the top of the screen that reads as a gap. Setting it
+      here also removes the flash of the wrong theme on cold start.
+
+      The colours below must match --theme-color in styles/themes.css. They're
+      duplicated rather than read from CSS because the stylesheet is injected
+      after this runs, so getComputedStyle would come back empty.
+    -->
+    <script>
+      (function () {
+        try {
+          var THEME_COLORS = {
+            midnight: '#07080b',
+            daylight: '#faf9f7',
+            aurora: '#4c1d95',
+            terra: '#f6f1e8',
+            golden: '#f7eedc',
+          }
+          var saved = JSON.parse(localStorage.getItem('jfj:settings') || '{}')
+          var theme = THEME_COLORS[saved.theme] ? saved.theme : 'midnight'
+          document.documentElement.dataset.theme = theme
+          var meta = document.querySelector('meta[name="theme-color"]')
+          if (meta) meta.setAttribute('content', THEME_COLORS[theme])
+        } catch (err) {
+          /* first run, or storage unavailable — the default theme is fine */
+        }
+      })()
+    </script>
   </head>
   <body>
     <div id="root"></div>

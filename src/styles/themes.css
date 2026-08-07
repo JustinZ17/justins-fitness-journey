@@ -156,7 +156,9 @@
   --r-md: 18px;
   --r-lg: 26px;
 
-  --theme-color: #6b21a8;
+  /* The very top of the gradient, so the iOS status bar band matches the pixel
+     directly below it rather than a mid-gradient purple. */
+  --theme-color: #4c1d95;
 }
 
 /* ---------- 4. Terra — sage, terracotta, cream, softer edges ---------- */
