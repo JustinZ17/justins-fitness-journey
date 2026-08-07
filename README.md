@@ -3,7 +3,7 @@
 A single-user workout and protein tracker that installs to the iOS home screen and works
 offline. No backend, no auth, no accounts — everything lives in the phone's localStorage.
 
-**Live:** https://JZ17392.github.io/justins-fitness-journey/ *(after the first deploy)*
+**Live:** https://justinz17.github.io/justins-fitness-journey/
 
 ## What it does
 
