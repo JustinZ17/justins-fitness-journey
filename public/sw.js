@@ -38,19 +38,44 @@ const SHELL_ROOT = new URL('./', self.location).href
  * visit — and "it worked at home but not in the basement" is exactly the bug
  * that would produce.
  */
+/** Asset URLs the currently deployed index.html points at. */
+async function currentAssets() {
+  const html = await (await fetch(new URL('./index.html', self.location), { cache: 'reload' })).text()
+  return [...html.matchAll(/(?:src|href)="([^"]+)"/g)]
+    .map((m) => new URL(m[1], self.location).href)
+    .filter((url) => url.includes('/assets/'))
+}
+
 async function precache() {
   const cache = await caches.open(CACHE_NAME)
   // Individually, so one missing icon can't fail the whole install.
   await Promise.all(SHELL.map((url) => cache.add(url).catch(() => {})))
 
   try {
-    const html = await (await fetch(new URL('./index.html', self.location), { cache: 'reload' })).text()
-    const assets = [...html.matchAll(/(?:src|href)="([^"]+)"/g)]
-      .map((m) => new URL(m[1], self.location).href)
-      .filter((url) => url.includes('/assets/'))
+    const assets = await currentAssets()
     await Promise.all(assets.map((url) => cache.add(url).catch(() => {})))
   } catch (err) {
     // Offline at install time. The runtime handler will fill the cache later.
+  }
+}
+
+/**
+ * Drop hashed assets from previous deploys.
+ *
+ * Every build emits new filenames, so without this the cache accumulates one
+ * dead JS+CSS pair per deploy forever — bad anywhere, worse on iOS where
+ * storage pressure is already what evicts this app's data.
+ */
+async function pruneStaleAssets() {
+  try {
+    const cache = await caches.open(CACHE_NAME)
+    const keep = new Set(await currentAssets())
+    const stale = (await cache.keys()).filter(
+      (req) => req.url.includes('/assets/') && !keep.has(req.url)
+    )
+    await Promise.all(stale.map((req) => cache.delete(req)))
+  } catch (err) {
+    // Offline during activation — the next activate will catch up.
   }
 }
 
@@ -63,6 +88,7 @@ self.addEventListener('activate', (event) => {
     caches
       .keys()
       .then((keys) => Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k))))
+      .then(() => pruneStaleAssets())
       .then(() => self.clients.claim())
   )
 })
