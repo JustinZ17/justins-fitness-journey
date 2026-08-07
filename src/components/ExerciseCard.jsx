@@ -6,6 +6,8 @@ import { relativeDay } from '../lib/date.js'
 import { parseTempo } from '../storage/schema.js'
 import { useStore } from '../storage/StoreProvider.jsx'
 import { useRestTimer } from './RestTimer.jsx'
+import { GuideSheet } from './GuideSheet.jsx'
+import { guideFor } from '../lib/guides.js'
 
 /**
  * One exercise in today's checklist.
@@ -16,6 +18,8 @@ import { useRestTimer } from './RestTimer.jsx'
  */
 export function ExerciseCard({ exercise, entry, session }) {
   const [open, setOpen] = useState(false)
+  const [guideOpen, setGuideOpen] = useState(false)
+  const hasGuide = Boolean(guideFor(exercise.name))
   const {
     sessions,
     settings,
@@ -220,28 +224,44 @@ export function ExerciseCard({ exercise, entry, session }) {
 
           {/* Today only — the workout template and the exercise library are
               both left alone, so this is safe to tap on a skipped lift. */}
-          <button
-            type="button"
-            className="link-btn remove-today"
-            onClick={() => removeExerciseFromSession(session.id, exercise.id)}
-          >
-            Remove from today
-          </button>
+          <div className="detail-actions">
+            {hasGuide && (
+              <button type="button" className="link-btn" onClick={() => setGuideOpen(true)}>
+                How to do this
+              </button>
+            )}
+            <button
+              type="button"
+              className="link-btn remove-today"
+              onClick={() => removeExerciseFromSession(session.id, exercise.id)}
+            >
+              Remove from today
+            </button>
+          </div>
         </div>
       )}
 
       {open && isPrimer && (
         <div className="ex-detail">
           {exercise.notes && <p className="notes" style={{ marginTop: 0, paddingTop: 0, borderTop: 'none' }}>{exercise.notes}</p>}
-          <button
-            type="button"
-            className="link-btn remove-today"
-            onClick={() => removeExerciseFromSession(session.id, exercise.id)}
-          >
-            Remove from today
-          </button>
+          <div className="detail-actions">
+            {hasGuide && (
+              <button type="button" className="link-btn" onClick={() => setGuideOpen(true)}>
+                How to do this
+              </button>
+            )}
+            <button
+              type="button"
+              className="link-btn remove-today"
+              onClick={() => removeExerciseFromSession(session.id, exercise.id)}
+            >
+              Remove from today
+            </button>
+          </div>
         </div>
       )}
+
+      {guideOpen && <GuideSheet exercise={exercise} onClose={() => setGuideOpen(false)} />}
     </article>
   )
 }

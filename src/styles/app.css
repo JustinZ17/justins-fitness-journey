@@ -976,13 +976,107 @@ select.input {
   color: var(--ink-muted);
 }
 
-.remove-today {
-  display: block;
+.detail-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
   margin-top: var(--sp-3);
+}
+
+.remove-today {
   color: var(--danger);
   text-decoration: none;
   font-size: var(--step--1);
   font-weight: 600;
+}
+
+/* ------------------------------------------------------------- guides ----- */
+
+.guide-art {
+  padding: var(--sp-3);
+  margin-bottom: var(--sp-4);
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+}
+
+/* No max-height: the viewBox aspect is fixed, so capping the height just
+   letterboxes the drawing inside its own box instead of scaling it. */
+.guide-art svg {
+  display: block;
+  width: 100%;
+  max-width: 340px;
+  height: auto;
+  margin: 0 auto;
+}
+
+.guide-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  counter-reset: guide;
+}
+
+.guide-steps li {
+  position: relative;
+  padding-left: var(--sp-6);
+  counter-increment: guide;
+}
+
+.guide-steps li::before {
+  content: counter(guide);
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--r-pill);
+  background: var(--accent-soft);
+  border: 1px solid var(--accent-line);
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.guide-label {
+  display: block;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 3px;
+}
+
+.guide-steps p,
+.guide-watch p {
+  font-size: var(--step--1);
+  line-height: 1.55;
+}
+
+.guide-watch {
+  margin-top: var(--sp-5);
+  padding: var(--sp-3) var(--sp-4);
+  border-radius: var(--r-md);
+  background: color-mix(in srgb, var(--warn) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--warn) 32%, transparent);
+}
+
+.guide-watch .guide-label {
+  color: var(--warn);
+}
+
+.guide-caveat {
+  margin-top: var(--sp-4);
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--ink-faint);
 }
 
 .notes {
