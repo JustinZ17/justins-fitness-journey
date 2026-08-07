@@ -1,13 +1,15 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useStore } from '../storage/StoreProvider.jsx'
 import { formatLong, todayISO } from '../lib/date.js'
 import { ExerciseCard } from '../components/ExerciseCard.jsx'
 import { ProteinSection } from '../components/ProteinSection.jsx'
 import { BodyWeightRow } from '../components/BodyWeightRow.jsx'
-import { GearIcon } from '../components/Icons.jsx'
+import { DayWorkoutPicker } from '../components/DayWorkoutPicker.jsx'
+import { ChevronIcon, GearIcon } from '../components/Icons.jsx'
 
-export function Today({ onOpenSettings, onGoToRoutines }) {
+export function Today({ onOpenSettings }) {
   const date = todayISO()
+  const [pickerOpen, setPickerOpen] = useState(false)
   const { exercises, sessions, workoutForDate, ensureSession } = useStore()
 
   const workout = workoutForDate(date)
@@ -32,7 +34,12 @@ export function Today({ onOpenSettings, onGoToRoutines }) {
     <div className="screen">
       <header className="page-head">
         <div>
-          <h1>{workout ? workout.name : 'Rest day'}</h1>
+          {/* Tappable so the day's workout can be changed without waiting for
+              the Routines screen — including undoing it back to a rest day. */}
+          <button type="button" className="title-btn" onClick={() => setPickerOpen(true)}>
+            <h1>{workout ? workout.name : 'Rest day'}</h1>
+            <ChevronIcon />
+          </button>
           <p className="date">{formatLong(date)}</p>
         </div>
         <button type="button" className="icon-btn" aria-label="Settings" onClick={onOpenSettings}>
@@ -65,8 +72,8 @@ export function Today({ onOpenSettings, onGoToRoutines }) {
       ) : (
         <div className="empty">
           <p style={{ marginTop: 0 }}>Nothing scheduled today.</p>
-          <button type="button" className="btn" onClick={onGoToRoutines}>
-            Set up your week
+          <button type="button" className="btn" onClick={() => setPickerOpen(true)}>
+            Pick a workout
           </button>
         </div>
       )}
@@ -76,6 +83,8 @@ export function Today({ onOpenSettings, onGoToRoutines }) {
       <section className="section">
         <BodyWeightRow date={date} />
       </section>
+
+      {pickerOpen && <DayWorkoutPicker date={date} onClose={() => setPickerOpen(false)} />}
     </div>
   )
 }

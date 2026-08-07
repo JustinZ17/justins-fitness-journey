@@ -22,12 +22,7 @@ function Shell() {
 
   return (
     <div className="app">
-      {tab === 'today' && (
-        <Today
-          onOpenSettings={() => setSettingsOpen(true)}
-          onGoToRoutines={() => setTab('routines')}
-        />
-      )}
+      {tab === 'today' && <Today onOpenSettings={() => setSettingsOpen(true)} />}
       {tab === 'routines' && <Placeholder title="Routines" onOpenSettings={() => setSettingsOpen(true)} />}
       {tab === 'history' && <Placeholder title="History" onOpenSettings={() => setSettingsOpen(true)} />}
 

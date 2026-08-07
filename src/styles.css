@@ -125,6 +125,25 @@ button {
   letter-spacing: -0.02em;
 }
 
+.title-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: -6px -6px 0;
+  padding: 6px;
+  border-radius: 10px;
+  color: inherit;
+}
+
+.title-btn:active {
+  background: var(--surface-2);
+}
+
+.title-btn svg {
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
 .page-head .date {
   margin: 2px 0 0;
   color: var(--muted);
@@ -785,6 +804,50 @@ select.input {
 
 .btn:disabled {
   opacity: 0.45;
+}
+
+/* ---------- picker list ---------- */
+
+.picker-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.picker-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  min-height: 62px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  text-align: left;
+  color: var(--text);
+}
+
+.picker-item:active {
+  background: var(--surface-3);
+}
+
+.picker-item.selected {
+  border-color: var(--accent);
+  background: var(--accent-dim);
+  color: var(--accent);
+}
+
+.picker-item strong {
+  display: block;
+  font-size: 16px;
+  font-weight: 650;
+}
+
+.picker-item small {
+  color: var(--muted);
+  font-size: 13px;
 }
 
 .sheet-row {
