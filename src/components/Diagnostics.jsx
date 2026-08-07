@@ -33,8 +33,11 @@ export function Diagnostics() {
         safeBottom: cs.getPropertyValue('--safe-bottom').trim(),
         appH: appRect ? Math.round(appRect.height) : null,
         barBottom: barRect ? Math.round(barRect.bottom) : null,
-        // The number that matters: unpainted screen below the tab bar.
+        // Gap inside the viewport — a layout problem, fixable in CSS.
         deadStrip: barRect ? Math.round(window.innerHeight - barRect.bottom) : null,
+        // Screen the web view was never given — an iOS chrome problem, and no
+        // amount of CSS can reach it. Distinguishing the two took a round trip.
+        screenGap: (window.screen?.height ?? 0) - window.innerHeight,
       })
     }
 
@@ -54,7 +57,10 @@ export function Diagnostics() {
       <summary>Diagnostics</summary>
       <dl className="diag-list">
         {Object.entries(info).map(([k, v]) => (
-          <div key={k} className={k === 'deadStrip' && v !== 0 ? 'diag-bad' : undefined}>
+          <div
+            key={k}
+            className={(k === 'deadStrip' || k === 'screenGap') && v !== 0 ? 'diag-bad' : undefined}
+          >
             <dt>{k}</dt>
             <dd>{String(v)}</dd>
           </div>

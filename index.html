@@ -23,7 +23,15 @@
     <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <!-- NOT black-translucent. It is meant to give a full-screen viewport, but
+         on an installed app it handed us one that was screen height minus the
+         status bar while still sitting at the top — so the bottom of the screen
+         fell outside the web view and nothing could paint it. Measured on
+         device: screen 956, viewport 894, inset-top 62.
+         "default" lets iOS place the web view below the status bar and run it
+         to the bottom, and it tints the bar from theme-color, which already
+         tracks the active theme. -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Fitness" />
   </head>
   <body>
