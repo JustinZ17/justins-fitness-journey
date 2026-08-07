@@ -8,6 +8,7 @@ import {
   SEED,
   newId,
 } from './schema.js'
+import { migrateSeed } from './migrate.js'
 import { dayKey, todayISO } from '../lib/date.js'
 import { lastPerformance, suggestNext } from '../lib/progression.js'
 
@@ -90,6 +91,12 @@ export function StoreProvider({ children }) {
       if (cancelled) return
 
       const loaded = Object.fromEntries(pairs)
+
+      // Read this BEFORE merging defaults. DEFAULT_SETTINGS carries the current
+      // seedVersion, so merging first hands every old install the latest number
+      // and the migration below concludes there's nothing to do.
+      const storedSeedVersion = loaded.settings?.seedVersion ?? 1
+
       // Merge settings over defaults so fields added in a later version show up
       // without a migration step.
       loaded.settings = {
@@ -97,6 +104,21 @@ export function StoreProvider({ children }) {
         ...loaded.settings,
         schedule: { ...DEFAULT_SETTINGS.schedule, ...(loaded.settings?.schedule ?? {}) },
       }
+
+      // An install seeded under an older default program catches up here.
+      // Existing installs are the only ones that matter, so a seed change that
+      // only reached first-time users would never have arrived at all.
+      const migrated = migrateSeed({
+        ...loaded,
+        settings: { ...loaded.settings, seedVersion: storedSeedVersion },
+      })
+      if (migrated) {
+        Object.assign(loaded, migrated)
+        await Promise.all(
+          Object.keys(migrated).map((name) => driver.set(COLLECTIONS[name], loaded[name]))
+        )
+      }
+
       setAll(loaded)
       setReady(true)
     })()

@@ -25,6 +25,16 @@
 
 export const SCHEMA_VERSION = 2
 
+/**
+ * Bumped whenever the seeded program changes.
+ *
+ * Seeding used to run once, guarded by a boolean, so anyone who had already
+ * opened the app was pinned to whatever the defaults were that day — a later
+ * change to the program simply never arrived. This version lets an existing
+ * install pick up a new default program without losing anything logged.
+ */
+export const SEED_VERSION = 2
+
 export const COLLECTIONS = {
   settings: 'settings',
   exercises: 'exercises',
@@ -70,6 +80,7 @@ export const THEMES = [
 
 export const DEFAULT_SETTINGS = {
   version: SCHEMA_VERSION,
+  seedVersion: SEED_VERSION,
   proteinTarget: 120,
   unit: 'lb',
   theme: 'midnight',
