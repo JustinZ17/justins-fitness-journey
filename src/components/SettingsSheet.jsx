@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import { Sheet } from './Sheet.jsx'
 import { ThemePicker } from './ThemePicker.jsx'
+import { Diagnostics } from './Diagnostics.jsx'
 import { useStore } from '../storage/StoreProvider.jsx'
 import { todayISO } from '../lib/date.js'
 
@@ -148,7 +149,9 @@ export function SettingsSheet({ onClose }) {
         onChange={handleImportFile}
       />
 
-      <button type="button" className="btn full" onClick={onClose} style={{ marginTop: 8 }}>
+      <Diagnostics />
+
+      <button type="button" className="btn full" onClick={onClose} style={{ marginTop: 'var(--sp-4)' }}>
         Done
       </button>
     </Sheet>
