@@ -14,8 +14,13 @@
  *
  * All dates are 'YYYY-MM-DD' in local time — see lib/date.js.
  *
- * NOTE: the seed below is a generic beginner split. This file is committed to a
- * public repo, so personal programming belongs in an imported backup, never here.
+ * The seed below is Justin's own training day, so a fresh install or a cleared
+ * storage comes back as his real program rather than a stock split.
+ *
+ * It carries the prescription only — movements, sets, reps, tempo, rest, and the
+ * D-group tri-set. Deliberately NO working weights and NO weekly schedule: this
+ * file is committed to a public repo and git history is permanent, so how much
+ * he lifts and which days he trains stay in his private backup instead.
  */
 
 export const SCHEMA_VERSION = 2
@@ -57,7 +62,8 @@ export const DEFAULT_SETTINGS = {
   proteinTarget: 120,
   unit: 'lb',
   theme: 'midnight',
-  schedule: { sun: null, mon: 'w-push', tue: null, wed: 'w-pull', thu: null, fri: 'w-legs', sat: null },
+  // Left empty on purpose — the training week is set in the app, not shipped here.
+  schedule: { sun: null, mon: null, tue: null, wed: null, thu: null, fri: null, sat: null },
 }
 
 export const newId = (prefix = 'id') =>
@@ -77,9 +83,10 @@ export function parseTempo(tempo) {
   return digits
 }
 
-// --- seed: a standard beginner dumbbell push/pull/legs split ----------------
-// Everything here is editable or deletable. Increment is per exercise because
-// dumbbells jump 5 lb while the bigger lower-body lifts take 10 lb steps early on.
+// --- seed: Justin's own training day ---------------------------------------
+// Prescription only. Working weights live in his private backup, not here.
+// Slot letters are the coach's grouping: a shared letter (D1/D2/D3) runs as a
+// superset, which Today renders as one bracketed block.
 
 const ex = (id, name, targetSets, targetReps, increment = 5, notes = '', extra = {}) => ({
   id,
@@ -97,45 +104,41 @@ const ex = (id, name, targetSets, targetReps, increment = 5, notes = '', extra =
 })
 
 export const SEED_EXERCISES = [
-  // Push
-  ex('e-db-bench', 'Dumbbell Bench Press', 3, 10, 5, 'Elbows ~45°, control the way down.'),
-  ex('e-incline-press', 'Incline Dumbbell Press', 3, 10, 5),
-  ex('e-shoulder-press', 'Dumbbell Shoulder Press', 3, 10, 5),
-  ex('e-lateral-raise', 'Lateral Raise', 3, 12, 5, 'Light. Lead with the elbows.', { kind: 'accessory' }),
-  ex('e-tricep-ext', 'Overhead Tricep Extension', 3, 12, 5, '', { kind: 'accessory' }),
-  // Pull
-  ex('e-db-row', 'One-Arm Dumbbell Row', 3, 10, 5, 'Per side. Pull to the hip, not the chest.'),
-  ex('e-db-pullover', 'Dumbbell Pullover', 3, 12, 5),
-  ex('e-rear-delt-fly', 'Rear Delt Fly', 3, 12, 5, '', { kind: 'accessory' }),
-  ex('e-db-curl', 'Dumbbell Curl', 3, 10, 5, '', { kind: 'accessory' }),
-  ex('e-hammer-curl', 'Hammer Curl', 3, 10, 5, '', { kind: 'accessory' }),
-  // Legs
-  ex('e-goblet-squat', 'Goblet Squat', 3, 10, 10, 'One dumbbell at the chest. Sit down, not back.'),
-  ex('e-rdl', 'Dumbbell Romanian Deadlift', 3, 10, 10, 'Hinge at the hips, soft knees, flat back.'),
-  ex('e-db-lunge', 'Dumbbell Lunge', 3, 10, 5, 'Per leg.'),
-  ex('e-calf-raise', 'Dumbbell Calf Raise', 3, 15, 5, '', { kind: 'accessory' }),
-  ex('e-glute-bridge', 'Dumbbell Glute Bridge', 3, 12, 10, '', { kind: 'accessory' }),
+  ex('e-atw', 'ATW', 0, 0, 5, 'Primer — no load tracked.', { kind: 'primer', slot: 'P1' }),
+  ex('e-leg-press', 'Leg press', 3, 12, 10, '', {
+    slot: 'A1',
+    tempo: '2100',
+    restSeconds: 90,
+  }),
+  ex('e-seated-row-high', 'Seated row (High)', 3, 12, 5, '', {
+    slot: 'B1',
+    tempo: '2002',
+    restSeconds: 90,
+  }),
+  ex('e-chest-press', 'Chest press', 3, 10, 5, '', {
+    slot: 'C1',
+    tempo: '2100',
+    restSeconds: 90,
+  }),
+  ex('e-lateral-raise', 'Lateral raise', 3, 14, 2.5, '', {
+    kind: 'accessory',
+    slot: 'D1',
+    restSeconds: 90,
+  }),
+  ex('e-bicep-curl', 'Bicep curl', 3, 11, 2.5, '', { kind: 'accessory', slot: 'D2' }),
+  ex('e-tricep-pushdown', 'Tricep pushdown', 3, 12, 2.5, '', { kind: 'accessory', slot: 'D3' }),
 ]
 
 export const SEED_WORKOUTS = [
   {
-    id: 'w-push',
-    name: 'Push Day',
-    note: '',
-    exerciseIds: ['e-db-bench', 'e-incline-press', 'e-shoulder-press', 'e-lateral-raise', 'e-tricep-ext'],
+    id: 'w-day3',
+    name: 'Day 3',
+    note: 'Solo session · ~43 min · programmed by trainer',
+    exerciseIds: SEED_EXERCISES.map((e) => e.id),
   },
-  {
-    id: 'w-pull',
-    name: 'Pull Day',
-    note: '',
-    exerciseIds: ['e-db-row', 'e-db-pullover', 'e-rear-delt-fly', 'e-db-curl', 'e-hammer-curl'],
-  },
-  {
-    id: 'w-legs',
-    name: 'Leg Day',
-    note: '',
-    exerciseIds: ['e-goblet-squat', 'e-rdl', 'e-db-lunge', 'e-calf-raise', 'e-glute-bridge'],
-  },
+  // Coach-led days vary week to week, so there is nothing to pre-plan — this
+  // exists to name the day and hold whatever gets logged ad-hoc.
+  { id: 'w-trainer', name: 'Trainer session', note: 'With coach · log as you go', exerciseIds: [] },
 ]
 
 /** Special food used by the "just log grams of protein" path. */
