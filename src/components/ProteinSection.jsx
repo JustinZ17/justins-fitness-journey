@@ -3,6 +3,7 @@ import { useStore } from '../storage/StoreProvider.jsx'
 import { DIRECT_PROTEIN_ID } from '../storage/schema.js'
 import { TrashIcon } from './Icons.jsx'
 import { Sheet } from './Sheet.jsx'
+import { FoodManager } from './FoodManager.jsx'
 
 const proteinOf = (food, grams) => ((food?.proteinPer100g ?? 0) * grams) / 100
 const round = (n) => Math.round(n * 10) / 10
@@ -10,6 +11,7 @@ const round = (n) => Math.round(n * 10) / 10
 export function ProteinSection({ date }) {
   const { foods, foodEntries, settings, addFoodEntry, addProteinDirect, removeFoodEntry } = useStore()
   const [manualOpen, setManualOpen] = useState(false)
+  const [foodsOpen, setFoodsOpen] = useState(false)
 
   const foodsById = useMemo(() => new Map(foods.map((f) => [f.id, f])), [foods])
   const today = useMemo(() => foodEntries.filter((e) => e.date === date), [foodEntries, date])
@@ -18,13 +20,19 @@ export function ProteinSection({ date }) {
   const target = settings.proteinTarget || 120
   const pct = Math.min(100, (total / target) * 100)
 
-  // Ranked by what he actually eats, so the row gets better with use.
+  // Pinned first, then whatever you actually eat most, so the row is partly
+  // chosen and partly earned. Archived foods never appear.
   const quick = useMemo(
     () =>
       foods
-        .filter((f) => f.id !== DIRECT_PROTEIN_ID)
+        .filter((f) => f.id !== DIRECT_PROTEIN_ID && !f.archived)
         .slice()
-        .sort((a, b) => (b.useCount || 0) - (a.useCount || 0))
+        .sort(
+          (a, b) =>
+            (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0) ||
+            (b.useCount || 0) - (a.useCount || 0) ||
+            a.name.localeCompare(b.name)
+        )
         .slice(0, 6),
     [foods]
   )
@@ -68,6 +76,10 @@ export function ProteinSection({ date }) {
           ))}
         </div>
 
+        <button type="button" className="link-btn edit-foods" onClick={() => setFoodsOpen(true)}>
+          Edit foods
+        </button>
+
         {today.length > 0 && (
           <div className="entry-list">
             {today.map((entry) => {
@@ -94,6 +106,8 @@ export function ProteinSection({ date }) {
         )}
       </div>
 
+      {foodsOpen && <FoodManager onClose={() => setFoodsOpen(false)} />}
+
       {manualOpen && (
         <ManualEntrySheet
           foods={foods}
@@ -113,7 +127,7 @@ export function ProteinSection({ date }) {
 }
 
 function ManualEntrySheet({ foods, onClose, onAddFood, onAddDirect }) {
-  const selectable = foods.filter((f) => f.id !== DIRECT_PROTEIN_ID)
+  const selectable = foods.filter((f) => f.id !== DIRECT_PROTEIN_ID && !f.archived)
   const [foodId, setFoodId] = useState(selectable[0]?.id ?? '')
   const [grams, setGrams] = useState(String(selectable[0]?.defaultServingGrams ?? 100))
   const [direct, setDirect] = useState('')

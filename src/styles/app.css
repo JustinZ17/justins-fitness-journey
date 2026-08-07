@@ -1964,6 +1964,91 @@ button.bw-row:active {
   line-height: 1.5;
 }
 
+/* --------------------------------------------------------------- foods --- */
+
+.edit-foods {
+  display: block;
+  margin: var(--sp-3) auto 0;
+}
+
+.pin-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 7px;
+  vertical-align: middle;
+  border-radius: var(--r-pill);
+  background: var(--accent);
+}
+
+.picker-item.dim {
+  opacity: 0.55;
+}
+
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  width: 100%;
+  min-height: 58px;
+  padding: var(--sp-3) var(--sp-4);
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  text-align: left;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.toggle-row.on {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.toggle-row strong {
+  display: block;
+  font-size: var(--step-0);
+  font-weight: 700;
+}
+
+.toggle-row small {
+  font-size: var(--step--1);
+  color: var(--ink-muted);
+}
+
+.toggle-switch {
+  position: relative;
+  flex-shrink: 0;
+  width: 46px;
+  height: 28px;
+  border-radius: var(--r-pill);
+  background: var(--surface-3);
+  border: 1px solid var(--line-strong);
+  transition: background-color 0.18s ease, border-color 0.18s ease;
+}
+
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 22px;
+  height: 22px;
+  border-radius: var(--r-pill);
+  background: var(--ink-faint);
+  transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.18s ease;
+}
+
+.toggle-row.on .toggle-switch {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.toggle-row.on .toggle-switch::after {
+  background: var(--accent-ink);
+  transform: translateX(18px);
+}
+
 /* ------------------------------------------------------------- backup ----- */
 
 .backup-status {

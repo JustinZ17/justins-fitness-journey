@@ -358,6 +358,25 @@ export function StoreProvider({ children }) {
     [mutate]
   )
 
+  /**
+   * Retire a food without touching history.
+   *
+   * A hard delete would orphan every FoodEntry pointing at it, and since
+   * protein is computed from the food record, those days would silently drop to
+   * zero grams — quietly falsifying the chart. Archiving hides it from the
+   * pickers while keeping past days correct.
+   */
+  const setFoodArchived = useCallback(
+    (id, archived) =>
+      mutate('foods', (list) => list.map((f) => (f.id === id ? { ...f, archived } : f))),
+    [mutate]
+  )
+
+  const toggleFoodPinned = useCallback(
+    (id) => mutate('foods', (list) => list.map((f) => (f.id === id ? { ...f, pinned: !f.pinned } : f))),
+    [mutate]
+  )
+
   // --- body weight ---------------------------------------------------------
 
   const removeBodyWeight = useCallback(
@@ -484,6 +503,8 @@ export function StoreProvider({ children }) {
       removeFoodEntry,
       saveFood,
       removeFood,
+      setFoodArchived,
+      toggleFoodPinned,
       setBodyWeight,
       removeBodyWeight,
       saveExercise,
@@ -498,7 +519,8 @@ export function StoreProvider({ children }) {
       ready, state, updateSettings, setScheduleDay, ensureSession, removeSession, setSessionNote,
       addExerciseToSession, removeExerciseFromSession, toggleExerciseDone, toggleSetDone,
       patchSet, addSet, removeSet, applyWeightToPending, addFoodEntry, addProteinDirect,
-      removeFoodEntry, saveFood, removeFood, setBodyWeight, removeBodyWeight, saveExercise,
+      removeFoodEntry, saveFood, removeFood, setFoodArchived, toggleFoodPinned,
+      setBodyWeight, removeBodyWeight, saveExercise,
       removeExercise, saveWorkout, removeWorkout, exportAll, importAll, workoutForDate,
     ]
   )

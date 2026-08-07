@@ -141,12 +141,21 @@ export const SEED_WORKOUTS = [
 /** Special food used by the "just log grams of protein" path. */
 export const DIRECT_PROTEIN_ID = 'f-direct'
 
+/**
+ * pinned  — force it into the quick-add row regardless of how often it's used,
+ *           so a new staple doesn't have to earn its place first.
+ * archived — hidden everywhere you'd pick a food, but still resolvable by the
+ *           entries that already reference it. Deleting outright would silently
+ *           rewrite past protein totals to zero.
+ */
 const food = (id, name, proteinPer100g, defaultServingGrams) => ({
   id,
   name,
   proteinPer100g,
   defaultServingGrams,
   useCount: 0,
+  pinned: false,
+  archived: false,
 })
 
 export const SEED_FOODS = [
