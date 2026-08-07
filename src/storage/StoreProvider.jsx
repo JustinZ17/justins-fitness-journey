@@ -136,10 +136,13 @@ export function StoreProvider({ children }) {
         const exercise = exercises.find((e) => e.id === exerciseId)
         if (!exercise) return null
         const suggestion = suggestNext(exercise, lastPerformance(sessions, exerciseId))
+        // Explicit 0 is meaningful — primers/warm-ups carry no sets to log — so
+        // this can't collapse to `|| 3`.
+        const setCount = Number.isFinite(exercise.targetSets) ? exercise.targetSets : 3
         return {
           exerciseId,
           done: false,
-          sets: Array.from({ length: exercise.targetSets || 3 }, () => ({
+          sets: Array.from({ length: setCount }, () => ({
             weight: suggestion.weight,
             reps: suggestion.reps,
             done: false,

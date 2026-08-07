@@ -1,11 +1,34 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useStore } from '../storage/StoreProvider.jsx'
 import { formatLong, todayISO } from '../lib/date.js'
+import { KINDS } from '../storage/schema.js'
 import { ExerciseCard } from '../components/ExerciseCard.jsx'
 import { ProteinSection } from '../components/ProteinSection.jsx'
 import { BodyWeightRow } from '../components/BodyWeightRow.jsx'
 import { DayWorkoutPicker } from '../components/DayWorkoutPicker.jsx'
 import { ChevronIcon, GearIcon } from '../components/Icons.jsx'
+
+const KIND_ORDER = ['primer', 'main', 'accessory']
+
+/**
+ * A shared slot letter means a superset: D1/D2/D3 are performed back to back.
+ * Consecutive entries sharing a letter collapse into one bracketed group.
+ */
+function buildGroups(entries, exercisesById) {
+  const groups = []
+  for (const entry of entries) {
+    const exercise = exercisesById.get(entry.exerciseId)
+    if (!exercise) continue
+    const letter = exercise.slot ? exercise.slot[0] : null
+    const prev = groups[groups.length - 1]
+    if (prev && letter && prev.letter === letter && prev.kind === exercise.kind) {
+      prev.items.push({ entry, exercise })
+    } else {
+      groups.push({ letter, kind: exercise.kind || 'main', items: [{ entry, exercise }] })
+    }
+  }
+  return groups
+}
 
 export function Today({ onOpenSettings }) {
   const date = todayISO()
@@ -14,9 +37,8 @@ export function Today({ onOpenSettings }) {
 
   const workout = workoutForDate(date)
 
-  // Create today's session as soon as there's a workout scheduled, so every
-  // card has a real id to write against. Sessions with nothing logged are
-  // filtered out of History, so an unused one costs nothing.
+  // Created as soon as a workout is scheduled so every card has a real id to
+  // write against. Sessions with nothing logged are filtered out of History.
   useEffect(() => {
     if (workout) ensureSession(date, workout)
   }, [workout, date, ensureSession])
@@ -27,64 +49,104 @@ export function Today({ onOpenSettings }) {
   )
 
   const exercisesById = useMemo(() => new Map(exercises.map((e) => [e.id, e])), [exercises])
+
+  const groups = useMemo(
+    () => (session ? buildGroups(session.completed, exercisesById) : []),
+    [session, exercisesById]
+  )
+
   const doneCount = session?.completed.filter((c) => c.done).length ?? 0
   const totalCount = session?.completed.length ?? 0
+  const allDone = totalCount > 0 && doneCount === totalCount
+
+  // Section header whenever the kind changes going down the list.
+  let lastKind = null
 
   return (
     <div className="screen">
-      <header className="page-head">
-        <div>
-          {/* Tappable so the day's workout can be changed without waiting for
-              the Routines screen — including undoing it back to a rest day. */}
-          <button type="button" className="title-btn" onClick={() => setPickerOpen(true)}>
-            <h1>{workout ? workout.name : 'Rest day'}</h1>
-            <ChevronIcon />
-          </button>
-          <p className="date">{formatLong(date)}</p>
-        </div>
-        <button type="button" className="icon-btn" aria-label="Settings" onClick={onOpenSettings}>
-          <GearIcon />
-        </button>
-      </header>
-
-      {workout && session ? (
-        <section>
-          <div className="section-head">
-            <h2>Workout</h2>
-            <span className="muted" style={{ fontSize: 13, fontWeight: 600 }}>
-              {doneCount} / {totalCount} done
-            </span>
+      <div className="container">
+        <header className="page-head">
+          <div style={{ minWidth: 0 }}>
+            <p className="eyebrow">{formatLong(date)}</p>
+            <button type="button" className="title-btn" onClick={() => setPickerOpen(true)}>
+              <h1>{workout ? workout.name : 'Rest day'}</h1>
+              <ChevronIcon />
+            </button>
+            {workout?.note && <p className="subtitle">{workout.note}</p>}
           </div>
-
-          {session.completed.map((entry) => {
-            const exercise = exercisesById.get(entry.exerciseId)
-            if (!exercise) return null
-            return (
-              <ExerciseCard
-                key={entry.exerciseId}
-                exercise={exercise}
-                entry={entry}
-                session={session}
-              />
-            )
-          })}
-        </section>
-      ) : (
-        <div className="empty">
-          <p style={{ marginTop: 0 }}>Nothing scheduled today.</p>
-          <button type="button" className="btn" onClick={() => setPickerOpen(true)}>
-            Pick a workout
+          <button type="button" className="icon-btn" aria-label="Settings" onClick={onOpenSettings}>
+            <GearIcon />
           </button>
-        </div>
-      )}
+        </header>
 
-      <ProteinSection date={date} />
+        {workout && session && totalCount > 0 ? (
+          <section>
+            <div className="section-head">
+              <h2>Workout</h2>
+              <span className={`count-pill${allDone ? ' complete' : ''}`}>
+                {allDone ? 'All done' : `${doneCount} / ${totalCount}`}
+              </span>
+            </div>
 
-      <section className="section">
-        <BodyWeightRow date={date} />
-      </section>
+            {groups.map((group, gi) => {
+              const showKind = group.kind !== lastKind
+              lastKind = group.kind
+              const isSuperset = group.items.length > 1
 
-      {pickerOpen && <DayWorkoutPicker date={date} onClose={() => setPickerOpen(false)} />}
+              return (
+                <div key={`${group.letter ?? 'g'}-${gi}`}>
+                  {showKind && KIND_ORDER.includes(group.kind) && (
+                    <p className="kind-head">{KINDS[group.kind]?.label ?? group.kind}</p>
+                  )}
+
+                  <div className={`group${isSuperset ? ' superset' : ''}`}>
+                    {isSuperset && (
+                      <p className="group-label">
+                        {group.items.length === 2 ? 'Superset' : 'Tri-set'}
+                        <span>back to back, rest after the last</span>
+                      </p>
+                    )}
+                    {group.items.map(({ entry, exercise }) => (
+                      <ExerciseCard
+                        key={entry.exerciseId}
+                        exercise={exercise}
+                        entry={entry}
+                        session={session}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )
+            })}
+          </section>
+        ) : workout ? (
+          <div className="empty">
+            <p>
+              <strong>{workout.name}</strong> has no exercises yet.
+            </p>
+            <button type="button" className="btn" onClick={() => setPickerOpen(true)}>
+              Pick another workout
+            </button>
+          </div>
+        ) : (
+          <div className="empty">
+            <p>Nothing scheduled today.</p>
+            <button type="button" className="btn" onClick={() => setPickerOpen(true)}>
+              Pick a workout
+            </button>
+          </div>
+        )}
+
+        <ProteinSection date={date} />
+
+        <section className="section">
+          <div className="card">
+            <BodyWeightRow date={date} />
+          </div>
+        </section>
+
+        {pickerOpen && <DayWorkoutPicker date={date} onClose={() => setPickerOpen(false)} />}
+      </div>
     </div>
   )
 }

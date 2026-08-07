@@ -16,7 +16,7 @@ export function BodyWeightRow({ date }) {
 
   if (!open) {
     return (
-      <button type="button" className="card bw-row" onClick={() => setOpen(true)}>
+      <button type="button" className="bw-row" onClick={() => setOpen(true)}>
         <span className="muted">Body weight</span>
         <span className="bw-value">
           {todayEntry ? `${todayEntry.weight} ${settings.unit}` : 'Log weigh-in'}
@@ -26,18 +26,18 @@ export function BodyWeightRow({ date }) {
   }
 
   return (
-    <div className="card bw-row open">
+    <div className="bw-row">
       <span className="muted">Body weight</span>
       <input
         className="input"
-        style={{ flex: 1, maxWidth: 120 }}
+        style={{ flex: 1, maxWidth: 110 }}
         inputMode="decimal"
         autoFocus
         value={value}
         onChange={(e) => setValue(e.target.value)}
         onKeyDown={(e) => e.key === 'Enter' && save()}
       />
-      <button type="button" className="btn primary" style={{ minHeight: 44 }} onClick={save}>
+      <button type="button" className="btn primary" style={{ minHeight: 44, padding: '0 16px' }} onClick={save}>
         Save
       </button>
     </div>

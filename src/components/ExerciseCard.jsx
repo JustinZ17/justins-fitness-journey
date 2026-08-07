@@ -3,6 +3,7 @@ import { Stepper } from './Stepper.jsx'
 import { CheckIcon, ChevronIcon, TrashIcon } from './Icons.jsx'
 import { formatSets, isPR, lastPerformance, suggestNext } from '../lib/progression.js'
 import { relativeDay } from '../lib/date.js'
+import { parseTempo } from '../storage/schema.js'
 import { useStore } from '../storage/StoreProvider.jsx'
 
 /**
@@ -29,17 +30,21 @@ export function ExerciseCard({ exercise, entry, session }) {
   const last = lastPerformance(sessions, exercise.id, { excludeSessionId: session.id })
   const suggestion = suggestNext(exercise, last)
   const anyPR = entry.sets.some((s) => isPR(sessions, exercise.id, s, { excludeSessionId: session.id }))
+  const tempo = parseTempo(exercise.tempo)
 
+  const isPrimer = exercise.kind === 'primer'
   const currentWeight = entry.sets[0]?.weight ?? suggestion.weight
   const suggestionApplied = entry.sets.every((s) => s.done || s.weight === suggestion.weight)
 
   const subtitle = last
-    ? `Last ${relativeDay(last.date).toLowerCase()}: ${formatSets(last.sets, unit)}`
-    : 'No history yet — first time'
+    ? `Last ${relativeDay(last.date).toLowerCase()} · ${formatSets(last.sets, unit)}`
+    : isPrimer
+      ? 'Warm-up — no load to track'
+      : 'First time — no history yet'
 
   return (
-    <div className={`card exercise${entry.done ? ' done' : ''}`}>
-      <div style={{ display: 'flex', alignItems: 'stretch' }}>
+    <article className={`card exercise${entry.done ? ' done' : ''}`}>
+      <div className="ex-row">
         <button
           type="button"
           className="ex-main"
@@ -49,36 +54,67 @@ export function ExerciseCard({ exercise, entry, session }) {
           <span className="checkbox">
             <CheckIcon />
           </span>
+
           <span className="ex-body">
-            <span className="ex-name">
-              {exercise.name}
-              {anyPR && (
-                <>
-                  {' '}
-                  <span className="pr-badge">PR</span>
-                </>
-              )}
+            <span className="ex-title">
+              {exercise.slot && <span className="slot">{exercise.slot}</span>}
+              <span className="ex-name">{exercise.name}</span>
+              {anyPR && <span className="pr-badge">PR</span>}
             </span>
             <span className="ex-meta">{subtitle}</span>
           </span>
-          <span className="ex-target">
-            {currentWeight} {unit}
-          </span>
+
+          {!isPrimer && (
+            <span className="ex-load">
+              <b>{currentWeight}</b>
+              <small>{unit}</small>
+            </span>
+          )}
         </button>
 
-        <button
-          type="button"
-          className="ex-expand"
-          aria-expanded={open}
-          aria-label={open ? 'Hide sets' : 'Show sets'}
-          onClick={() => setOpen((v) => !v)}
-        >
-          <ChevronIcon />
-        </button>
+        {!isPrimer && (
+          <button
+            type="button"
+            className="ex-expand"
+            aria-expanded={open}
+            aria-label={open ? `Hide sets for ${exercise.name}` : `Show sets for ${exercise.name}`}
+            onClick={() => setOpen((v) => !v)}
+          >
+            <ChevronIcon />
+          </button>
+        )}
       </div>
 
-      {open && (
+      {open && !isPrimer && (
         <div className="ex-detail">
+          {(exercise.targetSets || exercise.tempo || exercise.restSeconds || exercise.targetRIR != null) && (
+            <div className="chips">
+              {exercise.targetSets > 0 && (
+                <span className="chip">
+                  <b>
+                    {exercise.targetSets}×{exercise.targetReps}
+                  </b>{' '}
+                  target
+                </span>
+              )}
+              {exercise.tempo && (
+                <span className="chip">
+                  tempo <b>{exercise.tempo}</b>
+                </span>
+              )}
+              {exercise.restSeconds > 0 && (
+                <span className="chip">
+                  rest <b>{exercise.restSeconds}s</b>
+                </span>
+              )}
+              {exercise.targetRIR != null && (
+                <span className="chip">
+                  RIR <b>{exercise.targetRIR}</b>
+                </span>
+              )}
+            </div>
+          )}
+
           {!suggestionApplied && (
             <button
               type="button"
@@ -86,14 +122,16 @@ export function ExerciseCard({ exercise, entry, session }) {
               onClick={() => applyWeightToPending(session.id, exercise.id, suggestion.weight)}
             >
               <span style={{ flex: 1 }}>
-                Try{' '}
+                Load{' '}
                 <strong>
                   {suggestion.weight} {unit}
                 </strong>{' '}
                 × {suggestion.reps}
                 <span className="why">{suggestion.reason}</span>
               </span>
-              <span aria-hidden>→</span>
+              <span className="go" aria-hidden>
+                →
+              </span>
             </button>
           )}
 
@@ -143,19 +181,26 @@ export function ExerciseCard({ exercise, entry, session }) {
                 type="button"
                 className="btn danger"
                 onClick={() => removeSet(session.id, exercise.id, entry.sets.length - 1)}
-                aria-label="Remove last set"
               >
                 <TrashIcon /> Set
               </button>
             )}
           </div>
 
-          <p className="notes">
-            Target {exercise.targetSets}×{exercise.targetReps}
-            {exercise.notes ? ` — ${exercise.notes}` : ''}
-          </p>
+          {(exercise.notes || tempo) && (
+            <p className="notes">
+              {exercise.notes}
+              {tempo && (
+                <span className="tempo-legend">
+                  {exercise.notes ? <br /> : null}
+                  Tempo {exercise.tempo}: {tempo[0]}s down · {tempo[1]}s pause · {tempo[2] === '0' ? 'explosive' : `${tempo[2]}s`} up
+                  {tempo[3] !== '0' ? ` · ${tempo[3]}s hold` : ''}
+                </span>
+              )}
+            </p>
+          )}
         </div>
       )}
-    </div>
+    </article>
   )
 }

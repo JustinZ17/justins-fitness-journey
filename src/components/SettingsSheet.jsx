@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import { Sheet } from './Sheet.jsx'
+import { ThemePicker } from './ThemePicker.jsx'
 import { useStore } from '../storage/StoreProvider.jsx'
 import { todayISO } from '../lib/date.js'
 
@@ -67,6 +68,18 @@ export function SettingsSheet({ onClose }) {
   return (
     <Sheet title="Settings" onClose={onClose}>
       {status && <div className={`alert ${status.kind}`}>{status.text}</div>}
+
+      <div className="section-head">
+        <h2>Theme</h2>
+      </div>
+      <ThemePicker
+        value={settings.theme || 'midnight'}
+        onChange={(theme) => updateSettings({ theme })}
+      />
+
+      <div className="section-head" style={{ marginTop: 'var(--sp-6)' }}>
+        <h2>Targets</h2>
+      </div>
 
       <label className="field">
         <span>Daily protein target (g)</span>

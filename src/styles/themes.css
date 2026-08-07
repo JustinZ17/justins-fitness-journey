@@ -1,0 +1,202 @@
+/* ============================================================================
+   Themes
+   Every theme defines the same token contract, so no component ever branches on
+   theme id. Swapping data-theme on <html> re-skins the whole app.
+
+   Contract:
+     --bg / --bg-layer     page background + optional gradient wash
+     --surface*            card fills (surface-glass adds blur for Aurora)
+     --line                hairline borders
+     --ink / --ink-muted   text
+     --accent*             the one color that means "active / done / progress"
+     --shadow-*            elevation
+     --r-*                 corner radii (themes disagree about roundness)
+     --theme-color         what the iOS status bar tints to
+   ========================================================================= */
+
+:root {
+  /* Radii and shadows are theme-overridable but need sane defaults. */
+  --r-sm: 10px;
+  --r-md: 14px;
+  --r-lg: 20px;
+  --r-pill: 999px;
+
+  --blur: none;
+  --surface-glass: var(--surface);
+
+  /* Type scale — mobile first, fluid up to tablet. */
+  --step--1: clamp(0.78rem, 0.76rem + 0.1vw, 0.83rem);
+  --step-0: clamp(0.95rem, 0.92rem + 0.15vw, 1rem);
+  --step-1: clamp(1.09rem, 1.03rem + 0.3vw, 1.2rem);
+  --step-2: clamp(1.35rem, 1.24rem + 0.55vw, 1.6rem);
+  --step-3: clamp(1.8rem, 1.55rem + 1.2vw, 2.4rem);
+
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --sp-7: 48px;
+}
+
+/* ---------- 1. Midnight — dark, electric, gym-at-night ---------- */
+
+[data-theme='midnight'] {
+  color-scheme: dark;
+
+  --bg: #07080b;
+  --bg-layer: radial-gradient(120% 80% at 50% -10%, #12202a 0%, transparent 60%),
+    radial-gradient(90% 60% at 100% 100%, #0d1b16 0%, transparent 70%);
+
+  --surface: #12141b;
+  --surface-2: #1a1d26;
+  --surface-3: #232733;
+  --surface-glass: var(--surface);
+  --line: #262b38;
+  --line-strong: #333a4a;
+
+  --ink: #f3f6fa;
+  --ink-muted: #8b95a8;
+  --ink-faint: #5c6474;
+
+  --accent: #00e5a0;
+  --accent-ink: #00120b;
+  --accent-soft: rgba(0, 229, 160, 0.13);
+  --accent-line: rgba(0, 229, 160, 0.38);
+  --accent-glow: 0 0 0 1px rgba(0, 229, 160, 0.25), 0 8px 28px -8px rgba(0, 229, 160, 0.45);
+  --accent-grad: linear-gradient(90deg, #00e5a0, #6ef2c4);
+
+  --warn: #ffb340;
+  --danger: #ff6b6b;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 8px 24px -12px rgba(0, 0, 0, 0.85), 0 2px 6px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 24px 60px -20px rgba(0, 0, 0, 0.9);
+
+  --theme-color: #07080b;
+}
+
+/* ---------- 2. Daylight — off-white, muted, Apple Health calm ---------- */
+
+[data-theme='daylight'] {
+  color-scheme: light;
+
+  --bg: #faf9f7;
+  --bg-layer: none;
+
+  --surface: #ffffff;
+  --surface-2: #f4f3f0;
+  --surface-3: #eae8e4;
+  --surface-glass: var(--surface);
+  --line: #e8e6e1;
+  --line-strong: #d6d3cc;
+
+  --ink: #1b1b19;
+  --ink-muted: #77756e;
+  --ink-faint: #a5a29a;
+
+  --accent: #4a6fa5;
+  --accent-ink: #ffffff;
+  --accent-soft: rgba(74, 111, 165, 0.1);
+  --accent-line: rgba(74, 111, 165, 0.3);
+  --accent-glow: 0 0 0 1px rgba(74, 111, 165, 0.18);
+  --accent-grad: linear-gradient(90deg, #4a6fa5, #6d94c4);
+
+  --warn: #c2831f;
+  --danger: #c2554b;
+
+  --shadow-sm: 0 1px 2px rgba(28, 26, 22, 0.05);
+  --shadow-md: 0 6px 20px -10px rgba(28, 26, 22, 0.18), 0 1px 3px rgba(28, 26, 22, 0.05);
+  --shadow-lg: 0 24px 56px -24px rgba(28, 26, 22, 0.28);
+
+  --r-sm: 12px;
+  --r-md: 16px;
+  --r-lg: 24px;
+
+  --theme-color: #faf9f7;
+}
+
+/* ---------- 3. Aurora — vivid gradient, glassmorphism ---------- */
+
+[data-theme='aurora'] {
+  color-scheme: dark;
+
+  --bg: #4c1d95;
+  --bg-layer: linear-gradient(165deg, #4c1d95 0%, #7e22ce 38%, #be2d7f 72%, #db2777 100%);
+
+  /* Translucent so the gradient reads through the cards. */
+  --surface: rgba(255, 255, 255, 0.11);
+  --surface-2: rgba(255, 255, 255, 0.16);
+  --surface-3: rgba(255, 255, 255, 0.22);
+  --surface-glass: rgba(255, 255, 255, 0.11);
+  --line: rgba(255, 255, 255, 0.2);
+  --line-strong: rgba(255, 255, 255, 0.34);
+  --blur: saturate(160%) blur(16px);
+
+  --ink: #ffffff;
+  --ink-muted: rgba(255, 255, 255, 0.74);
+  --ink-faint: rgba(255, 255, 255, 0.5);
+
+  --accent: #fde047;
+  --accent-ink: #46208a;
+  --accent-soft: rgba(253, 224, 71, 0.18);
+  --accent-line: rgba(253, 224, 71, 0.5);
+  --accent-glow: 0 0 0 1px rgba(253, 224, 71, 0.4), 0 8px 30px -10px rgba(253, 224, 71, 0.5);
+  --accent-grad: linear-gradient(90deg, #fde047, #fb923c);
+
+  --warn: #fdba74;
+  --danger: #ffc2cc;
+
+  --shadow-sm: 0 1px 2px rgba(49, 10, 70, 0.2);
+  --shadow-md: 0 10px 30px -12px rgba(49, 10, 70, 0.55);
+  --shadow-lg: 0 30px 70px -25px rgba(49, 10, 70, 0.7);
+
+  --r-sm: 14px;
+  --r-md: 18px;
+  --r-lg: 26px;
+
+  --theme-color: #6b21a8;
+}
+
+/* ---------- 4. Terra — sage, terracotta, cream, softer edges ---------- */
+
+[data-theme='terra'] {
+  color-scheme: light;
+
+  --bg: #f6f1e8;
+  --bg-layer: radial-gradient(100% 60% at 0% 0%, rgba(138, 154, 123, 0.16) 0%, transparent 60%),
+    radial-gradient(90% 50% at 100% 100%, rgba(181, 101, 74, 0.12) 0%, transparent 65%);
+
+  --surface: #fffdf8;
+  --surface-2: #f0e9dc;
+  --surface-3: #e5dbc9;
+  --surface-glass: var(--surface);
+  --line: #e2d8c7;
+  --line-strong: #cdbfa8;
+
+  --ink: #2e2a24;
+  --ink-muted: #7d7365;
+  --ink-faint: #a89c8a;
+
+  --accent: #b5654a;
+  --accent-ink: #fffdf8;
+  --accent-soft: rgba(181, 101, 74, 0.11);
+  --accent-line: rgba(181, 101, 74, 0.3);
+  --accent-glow: 0 0 0 1px rgba(181, 101, 74, 0.2);
+  --accent-grad: linear-gradient(90deg, #b5654a, #8a9a7b);
+
+  --warn: #b98b3e;
+  --danger: #b5544a;
+
+  --shadow-sm: 0 1px 2px rgba(78, 64, 44, 0.06);
+  --shadow-md: 0 8px 24px -12px rgba(78, 64, 44, 0.22), 0 1px 3px rgba(78, 64, 44, 0.06);
+  --shadow-lg: 0 28px 60px -26px rgba(78, 64, 44, 0.3);
+
+  /* The "mindful" theme gets noticeably rounder corners. */
+  --r-sm: 16px;
+  --r-md: 22px;
+  --r-lg: 30px;
+
+  --theme-color: #f6f1e8;
+}

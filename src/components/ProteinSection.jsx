@@ -38,13 +38,13 @@ export function ProteinSection({ date }) {
         </button>
       </div>
 
-      <div className="card" style={{ padding: 'var(--pad)' }}>
+      <div className="card protein-card">
         <div className="protein-head">
           <div className="protein-total">
             {round(total)}
             <small> / {target} g</small>
           </div>
-          <div className="muted" style={{ fontSize: 14 }}>
+          <div className="protein-status">
             {total >= target ? 'Target hit' : `${round(target - total)} g to go`}
           </div>
         </div>
