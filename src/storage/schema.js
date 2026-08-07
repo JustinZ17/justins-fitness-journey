@@ -38,6 +38,17 @@ export const COLLECTIONS = {
 export const DAYS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']
 export const DAY_LABELS = { sun: 'Sun', mon: 'Mon', tue: 'Tue', wed: 'Wed', thu: 'Thu', fri: 'Fri', sat: 'Sat' }
 
+/** Full names, because "every Mon" pluralises to "Mons". */
+export const DAY_NAMES = {
+  sun: 'Sunday',
+  mon: 'Monday',
+  tue: 'Tuesday',
+  wed: 'Wednesday',
+  thu: 'Thursday',
+  fri: 'Friday',
+  sat: 'Saturday',
+}
+
 /**
  * Where an exercise sits in the session. Drives grouping and ordering on Today.
  * Mirrors how a coach writes a program: prime, then the heavy work, then the

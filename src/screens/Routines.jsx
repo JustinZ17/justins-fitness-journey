@@ -3,6 +3,7 @@ import { useStore } from '../storage/StoreProvider.jsx'
 import { DAYS, DAY_LABELS, KINDS } from '../storage/schema.js'
 import { ExerciseEditor } from '../components/ExerciseEditor.jsx'
 import { WorkoutEditor } from '../components/WorkoutEditor.jsx'
+import { WeekStrip } from '../components/WeekStrip.jsx'
 import { SettingsButton } from '../components/SettingsButton.jsx'
 import { PlusIcon } from '../components/Icons.jsx'
 
@@ -40,29 +41,13 @@ export function Routines({ onOpenSettings }) {
           <SettingsButton onClick={onOpenSettings} />
         </header>
 
-        {/* Week first: it's the thing that changes what Today shows. */}
+        {/* Week first: it's the thing that changes what Today shows — but kept
+            compact, so the exercise list below stays on screen. */}
         <section>
           <div className="section-head">
             <h2>Your week</h2>
           </div>
-          <div className="card week">
-            {DAYS.map((day) => (
-              <div className="week-row" key={day}>
-                <span className="week-day">{DAY_LABELS[day]}</span>
-                <select
-                  className="input week-select"
-                  value={settings.schedule?.[day] ?? ''}
-                  aria-label={`Workout for ${DAY_LABELS[day]}`}
-                  onChange={(e) => setScheduleDay(day, e.target.value || null)}
-                >
-                  <option value="">Rest day</option>
-                  {workouts.map((w) => (
-                    <option key={w.id} value={w.id}>{w.name}</option>
-                  ))}
-                </select>
-              </div>
-            ))}
-          </div>
+          <WeekStrip />
         </section>
 
         <section className="section">
