@@ -10,6 +10,7 @@ import { AddExerciseSheet } from '../components/AddExerciseSheet.jsx'
 import { DatePicker } from '../components/DatePicker.jsx'
 import { SessionSummary } from '../components/SessionSummary.jsx'
 import { SettingsButton } from '../components/SettingsButton.jsx'
+import { BackupBanner } from '../components/BackupBanner.jsx'
 import { CatIcon, ChevronIcon, PlusIcon } from '../components/Icons.jsx'
 
 const KIND_ORDER = ['primer', 'main', 'accessory']
@@ -80,6 +81,8 @@ export function Today({ date = todayISO(), onChangeDate, onOpenSettings }) {
             <span className="backdate-go">Back to today →</span>
           </button>
         )}
+
+        <BackupBanner />
 
         <header className="page-head">
           <div style={{ minWidth: 0 }}>

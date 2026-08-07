@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { persistenceStatus } from '../lib/backup.js'
 
 /**
  * Device readout, tucked away in Settings.
@@ -11,6 +12,11 @@ import { useEffect, useState } from 'react'
 export function Diagnostics() {
   const [info, setInfo] = useState(null)
   const [copied, setCopied] = useState(false)
+  const [persistence, setPersistence] = useState('checking')
+
+  useEffect(() => {
+    persistenceStatus().then(setPersistence)
+  }, [])
 
   useEffect(() => {
     const measure = () => {
@@ -53,6 +59,9 @@ export function Diagnostics() {
   }, [])
 
   if (!info) return null
+
+  // Whether the browser agreed to exempt this data from automatic clearing.
+  info.storagePersisted = persistence
 
   const text = Object.entries(info)
     .map(([k, v]) => `${k}: ${v}`)

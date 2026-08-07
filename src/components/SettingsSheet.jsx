@@ -3,8 +3,8 @@ import { Sheet } from './Sheet.jsx'
 import { ThemePicker } from './ThemePicker.jsx'
 import { Diagnostics } from './Diagnostics.jsx'
 import { useStore } from '../storage/StoreProvider.jsx'
-import { daysSince, todayISO } from '../lib/date.js'
-import { BACKUP_STALE_DAYS } from '../lib/backup.js'
+import { daysSince } from '../lib/date.js'
+import { BACKUP_STALE_DAYS, downloadBackup, persistenceStatus } from '../lib/backup.js'
 
 /**
  * Export/import is not a nice-to-have. iOS evicts localStorage for PWAs that go
@@ -29,17 +29,7 @@ export function SettingsSheet({ onClose }) {
 
   const handleExport = () => {
     try {
-      const payload = exportAll()
-      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' })
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `fitness-backup-${todayISO()}.json`
-      document.body.appendChild(a)
-      a.click()
-      a.remove()
-      // Revoke late; Safari needs the URL alive past the click.
-      setTimeout(() => URL.revokeObjectURL(url), 10000)
+      downloadBackup(exportAll())
       updateSettings({ lastExportAt: new Date().toISOString() })
       setStatus({ kind: 'ok', text: 'Backup downloaded. Keep it somewhere off this phone.' })
     } catch (err) {

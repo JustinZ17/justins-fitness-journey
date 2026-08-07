@@ -7,6 +7,7 @@ import { SettingsSheet } from './components/SettingsSheet.jsx'
 import { ErrorBoundary } from './components/ErrorBoundary.jsx'
 import { RestTimerProvider, RestTimerBar } from './components/RestTimer.jsx'
 import { todayISO } from './lib/date.js'
+import { requestPersistence } from './lib/backup.js'
 import { ChartIcon, DumbbellIcon, ListIcon, PawIcon } from './components/Icons.jsx'
 
 const TABS = [
@@ -25,6 +26,13 @@ function Shell() {
   const [viewDate, setViewDate] = useState(() => todayISO())
 
   const theme = settings.theme || 'midnight'
+
+  // Ask once, early, for the browser to exempt this data from automatic
+  // clearing. Safari decides on its own criteria and never prompts, so this
+  // costs nothing and can only help — the app previously never asked at all.
+  useEffect(() => {
+    requestPersistence()
+  }, [])
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme
