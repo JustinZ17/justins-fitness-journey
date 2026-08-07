@@ -93,8 +93,38 @@ p {
 .screen {
   flex: 1;
   overflow-y: auto;
+  /* clip, not hidden: no scroll container, so it can never scroll sideways and
+     it doesn't interfere with position:fixed sheets. A backstop only — the
+     layout below is built not to overflow in the first place. */
+  overflow-x: clip;
   -webkit-overflow-scrolling: touch;
   padding: calc(env(safe-area-inset-top) + var(--sp-4)) var(--sp-4) var(--sp-7);
+}
+
+/* Flex and grid items default to min-width:auto, meaning they refuse to shrink
+   below their content's intrinsic width. Anywhere a child is meant to flex and
+   truncate, that default has to be overridden explicitly or the parent grows
+   instead — silently, and by an amount that depends on the rendering font. */
+.ex-body,
+.ex-main,
+.entry-name,
+.stepper,
+.suggestion > span,
+.picker-item > span,
+.sheet-row > *,
+.title-btn h1,
+.protein-head > * {
+  min-width: 0;
+}
+
+/* A long unbroken word (a pasted exercise name) shouldn't be able to push the
+   layout wider than the screen. */
+.ex-name,
+.title-btn h1,
+.picker-item strong,
+.entry-name,
+.qa-name {
+  overflow-wrap: anywhere;
 }
 
 /* Mobile-first, but keep it composed rather than stretched on a laptop. */
@@ -106,12 +136,12 @@ p {
 
 /* ----------------------------------------------------------------- nav ---- */
 
+/* Not a grid: it holds a single centered child. Making the bar itself a
+   3-column grid put .tabbar-inner in column one, squeezing all three tabs into
+   the left third of the screen. */
 .tabbar {
   position: relative;
   z-index: 2;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--sp-1);
   padding: var(--sp-2) var(--sp-2) calc(env(safe-area-inset-bottom) + var(--sp-2));
   background: var(--surface-glass);
   backdrop-filter: var(--blur);
@@ -123,7 +153,7 @@ p {
 
 .tabbar-inner {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--sp-1);
   width: 100%;
   max-width: 560px;
@@ -862,6 +892,37 @@ select.input {
   color: var(--accent-ink);
 }
 
+/* On the narrowest phones the two steppers plus a checkbox leave the number
+   itself only a few pixels. Buy that space back from the chrome, not the value. */
+@media (max-width: 380px) {
+  .set-head,
+  .set-row {
+    gap: 4px;
+  }
+
+  .set-no {
+    width: 13px;
+  }
+
+  .stepper button {
+    width: 30px;
+  }
+
+  .stepper.reps button {
+    width: 28px;
+  }
+
+  .set-check,
+  .set-head-spacer {
+    width: 40px;
+  }
+
+  .ex-detail {
+    padding-left: var(--sp-3);
+    padding-right: var(--sp-3);
+  }
+}
+
 .set-actions {
   display: flex;
   gap: var(--sp-2);
@@ -961,16 +1022,21 @@ select.input {
   background: linear-gradient(90deg, var(--warn), var(--accent));
 }
 
+/* minmax(0, 1fr), never plain 1fr: grid items default to min-width:auto, so the
+   nowrap food names below would force their tracks wider than an equal share
+   and blow the grid out of its card. That failure is font-dependent — it stayed
+   invisible on a desktop test font and only showed up in SF Pro on device. */
 .quick-add {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--sp-2);
   margin-top: var(--sp-4);
 }
 
-@media (min-width: 420px) {
+/* Three across only once there's genuinely room for the longest names. */
+@media (min-width: 520px) {
   .quick-add {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
@@ -1233,7 +1299,7 @@ button.bw-row:active {
 
 .theme-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--sp-3);
 }
 
