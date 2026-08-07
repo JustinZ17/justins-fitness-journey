@@ -50,6 +50,20 @@ export function lastNDays(n, from = new Date()) {
   return out
 }
 
+/** Whole days between two ISO dates, or since an ISO timestamp. Null if absent. */
+export function daysSince(iso, from = new Date()) {
+  if (!iso) return null
+  const then = iso.length > 10 ? todayISO(new Date(iso)) : iso
+  return Math.round((isoToDate(todayISO(from)) - isoToDate(then)) / 86400000)
+}
+
+/** Shift an ISO date by n days, staying in local time. */
+export function addDays(iso, n) {
+  const d = isoToDate(iso)
+  d.setDate(d.getDate() + n)
+  return todayISO(d)
+}
+
 /** Human relative label for a past date: 'Today', 'Yesterday', '3 days ago'. */
 export function relativeDay(iso, from = new Date()) {
   const days = Math.round((isoToDate(todayISO(from)) - isoToDate(iso)) / 86400000)

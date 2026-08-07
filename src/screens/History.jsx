@@ -10,12 +10,13 @@ import {
 } from '../lib/progression.js'
 import { formatShort, isoToDate, lastNDays, relativeDay, todayISO } from '../lib/date.js'
 import { LineChart, BarChart } from '../components/Chart.jsx'
-import { ChevronIcon, GearIcon } from '../components/Icons.jsx'
+import { SettingsButton } from '../components/SettingsButton.jsx'
+import { ChevronIcon, TrashIcon } from '../components/Icons.jsx'
 
 const round = (n) => Math.round(n * 10) / 10
 
-export function History({ onOpenSettings }) {
-  const { sessions, exercises, workouts, foods, foodEntries, settings } = useStore()
+export function History({ onOpenSettings, onEditDate }) {
+  const { sessions, exercises, workouts, foods, foodEntries, bodyWeights, settings } = useStore()
   const unit = settings.unit
 
   const exercisesById = useMemo(() => new Map(exercises.map((e) => [e.id, e])), [exercises])
@@ -59,9 +60,7 @@ export function History({ onOpenSettings }) {
               <h1>History</h1>
             </div>
           </div>
-          <button type="button" className="icon-btn" aria-label="Settings" onClick={onOpenSettings}>
-            <GearIcon />
-          </button>
+          <SettingsButton onClick={onOpenSettings} />
         </header>
 
         <ProgressSection
@@ -74,11 +73,14 @@ export function History({ onOpenSettings }) {
 
         <ProteinSection foods={foods} foodEntries={foodEntries} target={settings.proteinTarget} />
 
+        <BodyWeightSection bodyWeights={bodyWeights} unit={unit} />
+
         <SessionsSection
           logged={logged}
           exercisesById={exercisesById}
           workoutsById={workoutsById}
           unit={unit}
+          onEditDate={onEditDate}
         />
       </div>
     </div>
@@ -243,9 +245,82 @@ function ProteinSection({ foods, foodEntries, target }) {
   )
 }
 
+function BodyWeightSection({ bodyWeights, unit }) {
+  const { removeBodyWeight } = useStore()
+
+  const sorted = useMemo(
+    () => bodyWeights.slice().sort((a, b) => a.date.localeCompare(b.date)),
+    [bodyWeights]
+  )
+
+  if (sorted.length === 0) return null
+
+  const points = sorted.map((b) => ({ x: isoToDate(b.date).getTime(), y: b.weight }))
+  const first = sorted[0]
+  const last = sorted[sorted.length - 1]
+  const delta = round(last.weight - first.weight)
+
+  return (
+    <section className="section">
+      <div className="section-head">
+        <h2>Body weight</h2>
+      </div>
+      <div className="card chart-card">
+        <div className="chart-head">
+          <div>
+            <span className="chart-big">
+              {last.weight}
+              <small> {unit}</small>
+            </span>
+            <span className="chart-sub">
+              {sorted.length === 1
+                ? 'first weigh-in'
+                : `${delta >= 0 ? '+' : ''}${delta} ${unit} since ${formatShort(first.date)}`}
+            </span>
+          </div>
+        </div>
+
+        <LineChart
+          points={points}
+          formatX={(x) => formatShort(todayISO(new Date(x)))}
+          formatY={(v) => Math.round(v)}
+          unit={` ${unit}`}
+        />
+
+        <div className="entry-list">
+          {sorted
+            .slice()
+            .reverse()
+            .slice(0, 5)
+            .map((b) => (
+              <div className="entry" key={b.id}>
+                <span className="entry-name">{relativeDay(b.date)}</span>
+                <span className="entry-protein">
+                  {b.weight} {unit}
+                </span>
+                <button
+                  type="button"
+                  className="entry-del"
+                  aria-label={`Delete weigh-in from ${b.date}`}
+                  onClick={() => removeBodyWeight(b.id)}
+                >
+                  <TrashIcon />
+                </button>
+              </div>
+            ))}
+        </div>
+        <p className="chart-foot">
+          To correct an old weigh-in, delete it and re-enter it from that day on Today.
+        </p>
+      </div>
+    </section>
+  )
+}
+
 /* --------------------------------------------------------------- sessions - */
 
-function SessionsSection({ logged, exercisesById, workoutsById, unit }) {
+function SessionsSection({ logged, exercisesById, workoutsById, unit, onEditDate }) {
+  const { removeSession } = useStore()
   const [openId, setOpenId] = useState(null)
 
   return (
@@ -300,6 +375,28 @@ function SessionsSection({ logged, exercisesById, workoutsById, unit }) {
                       </div>
                     )
                   })}
+
+                  {session.note && <p className="session-note">{session.note}</p>}
+
+                  <div className="sheet-row" style={{ marginTop: 'var(--sp-3)' }}>
+                    <button type="button" className="btn" onClick={() => onEditDate?.(session.date)}>
+                      Edit this day
+                    </button>
+                    <button
+                      type="button"
+                      className="btn danger"
+                      onClick={() => {
+                        if (
+                          window.confirm(
+                            `Delete this session from ${session.date}?\n\nThe weights logged here stop counting towards your history and suggestions.`
+                          )
+                        )
+                          removeSession(session.id)
+                      }}
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
               )}
             </div>

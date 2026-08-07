@@ -3,7 +3,8 @@ import { useStore } from '../storage/StoreProvider.jsx'
 import { DAYS, DAY_LABELS, KINDS } from '../storage/schema.js'
 import { ExerciseEditor } from '../components/ExerciseEditor.jsx'
 import { WorkoutEditor } from '../components/WorkoutEditor.jsx'
-import { GearIcon, PlusIcon } from '../components/Icons.jsx'
+import { SettingsButton } from '../components/SettingsButton.jsx'
+import { PlusIcon } from '../components/Icons.jsx'
 
 const KIND_ORDER = ['primer', 'main', 'accessory']
 
@@ -36,9 +37,7 @@ export function Routines({ onOpenSettings }) {
               <h1>Routines</h1>
             </div>
           </div>
-          <button type="button" className="icon-btn" aria-label="Settings" onClick={onOpenSettings}>
-            <GearIcon />
-          </button>
+          <SettingsButton onClick={onOpenSettings} />
         </header>
 
         {/* Week first: it's the thing that changes what Today shows. */}

@@ -228,6 +228,18 @@ export function StoreProvider({ children }) {
     [mutate]
   )
 
+  /** Delete a whole session — a duplicate, or a day logged by mistake. */
+  const removeSession = useCallback(
+    (sessionId) => mutate('sessions', (list) => list.filter((s) => s.id !== sessionId)),
+    [mutate]
+  )
+
+  const setSessionNote = useCallback(
+    (sessionId, note) =>
+      mutate('sessions', (list) => list.map((s) => (s.id === sessionId ? { ...s, note } : s))),
+    [mutate]
+  )
+
   const updateEntry = useCallback(
     (sessionId, exerciseId, updater) =>
       mutate('sessions', (list) =>
@@ -348,6 +360,11 @@ export function StoreProvider({ children }) {
 
   // --- body weight ---------------------------------------------------------
 
+  const removeBodyWeight = useCallback(
+    (id) => mutate('bodyWeights', (list) => list.filter((b) => b.id !== id)),
+    [mutate]
+  )
+
   const setBodyWeight = useCallback(
     (weight, date = todayISO()) =>
       mutate('bodyWeights', (list) => {
@@ -452,6 +469,8 @@ export function StoreProvider({ children }) {
       updateSettings,
       setScheduleDay,
       ensureSession,
+      removeSession,
+      setSessionNote,
       addExerciseToSession,
       removeExerciseFromSession,
       toggleExerciseDone,
@@ -466,6 +485,7 @@ export function StoreProvider({ children }) {
       saveFood,
       removeFood,
       setBodyWeight,
+      removeBodyWeight,
       saveExercise,
       removeExercise,
       saveWorkout,
@@ -475,11 +495,11 @@ export function StoreProvider({ children }) {
       workoutForDate,
     }),
     [
-      ready, state, updateSettings, setScheduleDay, ensureSession, addExerciseToSession,
-      removeExerciseFromSession, toggleExerciseDone, toggleSetDone,
+      ready, state, updateSettings, setScheduleDay, ensureSession, removeSession, setSessionNote,
+      addExerciseToSession, removeExerciseFromSession, toggleExerciseDone, toggleSetDone,
       patchSet, addSet, removeSet, applyWeightToPending, addFoodEntry, addProteinDirect,
-      removeFoodEntry, saveFood, removeFood, setBodyWeight, saveExercise, removeExercise,
-      saveWorkout, removeWorkout, exportAll, importAll, workoutForDate,
+      removeFoodEntry, saveFood, removeFood, setBodyWeight, removeBodyWeight, saveExercise,
+      removeExercise, saveWorkout, removeWorkout, exportAll, importAll, workoutForDate,
     ]
   )
 

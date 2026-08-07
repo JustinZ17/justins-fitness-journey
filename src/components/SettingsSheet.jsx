@@ -3,7 +3,8 @@ import { Sheet } from './Sheet.jsx'
 import { ThemePicker } from './ThemePicker.jsx'
 import { Diagnostics } from './Diagnostics.jsx'
 import { useStore } from '../storage/StoreProvider.jsx'
-import { todayISO } from '../lib/date.js'
+import { daysSince, todayISO } from '../lib/date.js'
+import { BACKUP_STALE_DAYS } from '../lib/backup.js'
 
 /**
  * Export/import is not a nice-to-have. iOS evicts localStorage for PWAs that go
@@ -17,6 +18,8 @@ export function SettingsSheet({ onClose }) {
   const fileRef = useRef(null)
 
   const latestWeight = bodyWeights.slice().sort((a, b) => b.date.localeCompare(a.date))[0]
+  const sinceExport = daysSince(settings.lastExportAt)
+  const backupStale = sinceExport === null || sinceExport >= BACKUP_STALE_DAYS
 
   const commitTarget = () => {
     const n = Math.round(Number(target))
@@ -37,6 +40,7 @@ export function SettingsSheet({ onClose }) {
       a.remove()
       // Revoke late; Safari needs the URL alive past the click.
       setTimeout(() => URL.revokeObjectURL(url), 10000)
+      updateSettings({ lastExportAt: new Date().toISOString() })
       setStatus({ kind: 'ok', text: 'Backup downloaded. Keep it somewhere off this phone.' })
     } catch (err) {
       setStatus({ kind: 'error', text: `Export failed: ${err.message}` })
@@ -128,9 +132,16 @@ export function SettingsSheet({ onClose }) {
       <div className="section-head" style={{ marginTop: 24 }}>
         <h2>Backup</h2>
       </div>
+      <div className={`backup-status${backupStale ? ' stale' : ''}`}>
+        {sinceExport === null
+          ? 'Never backed up'
+          : sinceExport === 0
+            ? 'Last backup: today'
+            : `Last backup: ${sinceExport} day${sinceExport === 1 ? '' : 's'} ago`}
+      </div>
       <p className="hint">
         There is no server. If iOS clears this app's storage, an exported file is the only way
-        back.
+        back — and it clears storage for apps left unused for about a week.
       </p>
 
       <div className="sheet-row" style={{ marginBottom: 12 }}>
